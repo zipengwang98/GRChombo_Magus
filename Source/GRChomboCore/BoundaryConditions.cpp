@@ -728,13 +728,20 @@ Box ExpandGridsToBoundaries::operator()(const Box &a_in_box)
 
     FOR1(idir)
     {
-        if (!(m_boundaries.m_params.is_periodic[idir]) && offset_lo[idir] == 0)
+        if (!m_boundaries.m_params.is_periodic[idir])
         {
-            out_box.growLo(idir, m_boundaries.m_num_ghosts);
-        }
-        if (!(m_boundaries.m_params.is_periodic[idir]) && offset_hi[idir] == 0)
-        {
-            out_box.growHi(idir, m_boundaries.m_num_ghosts);
+            if (m_boundaries.get_boundary_condition(Side::Lo, idir) ==
+                    BoundaryConditions::SOMMERFELD_BC &&
+                offset_lo[idir] == 0)
+            {
+                out_box.growLo(idir, m_boundaries.m_num_ghosts);
+            }
+            if (m_boundaries.get_boundary_condition(Side::Hi, idir) ==
+                    BoundaryConditions::SOMMERFELD_BC &&
+                offset_hi[idir] == 0)
+            {
+                out_box.growHi(idir, m_boundaries.m_num_ghosts);
+            }
         }
     }
     return out_box;
