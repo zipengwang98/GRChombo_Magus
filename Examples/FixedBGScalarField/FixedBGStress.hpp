@@ -78,22 +78,21 @@ template <class matter_t, class background_t> class FixedBGStress
 	data_t sCart_norm = 0.0;
 	FOR2(j, k)
 	  {
-	    sCart_norm += sqrt(sCart[j]*sCart[k]*metric_vars.gamma[j][k]);
+	    sCart_norm += sCart[j]*sCart[k]*metric_vars.gamma[j][k];
 	  }
+	sCart_norm = sqrt(sCart_norm);
 
 	Tensor<1, data_t> nCart;
 	FOR1(i)
 	{
-	  nCart[i] = sCart[i]/1.0; //sCart_norm;
+	  nCart[i] = sCart[i]/sCart_norm;
 	}
-
 
         data_t Stress = 0.0;
 	FOR1(i)
 	{
 	  Stress += emtensor.Sij[0][i]*nCart[i];
 	}
-	pout()<<"Stress"<< Stress <<endl;
 
 	Tensor<1, data_t> sSpher;
         sSpher[0] = 1.0;
@@ -111,7 +110,7 @@ template <class matter_t, class background_t> class FixedBGStress
 	Tensor<2, data_t> Sigma;
 	FOR2(i, j)
 	  {
-	    Sigma[i][j] = gamma_spher[i][j]; //+ gamma_spher[i][0]*gamma_spher[0][j];
+	    Sigma[i][j] = gamma_spher[i][j];
 	    FOR2(m,n)
 	    {
 	      Sigma[i][j] += gamma_spher[i][m] * nSpher[m] * gamma_spher[j][n] * nSpher[n];
