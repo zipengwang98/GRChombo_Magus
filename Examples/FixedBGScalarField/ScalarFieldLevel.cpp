@@ -13,18 +13,22 @@
 #include "Excision.hpp"
 #include "FixedBGEvolution.hpp"
 
-// For density calculation
-#include "FixedBGDensity.hpp"
+// For momentum flux calculation
+#include "FixedBGStress.hpp"
 
 // For tag cells
-#include "FixedGridsTaggingCriterion.hpp"
+#include "ExtractionFixedGridsTaggingCriterion.hpp"
+//#include "FixedGridsTaggingCriterion.hpp"
 
 // Problem specific includes
 #include "ComputePack.hpp"
 #include "FixedBGScalarField.hpp"
 #include "Potential.hpp"
-#include "ScalarGaussian.hpp"
+#include "ScalarConstant.hpp"
 #include "SetValue.hpp"
+
+//#include "WeylExtraction2.hpp"
+#include "StressExtraction.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
 void ScalarFieldLevel::specificAdvance()
@@ -45,22 +49,64 @@ void ScalarFieldLevel::initialData()
     // First set everything to zero ... we don't want undefined values in
     // constraints etc, then initial conditions for scalar field
     BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-    ScalarGaussian initial_sf(m_p.initial_params, m_dx);
+    ScalarConstant initial_sf(m_p.initial_params);
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boosted_bh, initial_sf),
                    m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
+}
+
+void ScalarFieldLevel::specificPostTimeStep()
+{
+  CH_TIME("ScalarFieldLevel::specificPostTimeStep");
+  if (m_p.activate_extraction == 1)
+    {
+      // Populate the Stress values on the grid
+      fillAllGhosts();
+      Potential potential(m_p.potential_params);
+      ScalarFieldWithPotential scalar_field(potential);
+      BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+      BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
+                 scalar_field, boosted_bh, m_dx, m_p.extraction_params.extraction_center),
+                     m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+
+      // Do the extraction on the min extraction level
+      if (m_level == m_p.extraction_params.min_extraction_level)
+        {
+	  // Now refresh the interpolator and do the interpolation
+	  m_gr_amr.m_interpolator->refresh();
+	  StressExtraction my_extraction(m_p.extraction_params, m_dt, m_time, m_restart_time);
+	  my_extraction.execute_query(m_gr_amr.m_interpolator);
+	  //  pout()<<"Hello2!"<<endl;
+        }
+    }
+}
+
+// Things to do before a plot level - need to calculate the Stress
+void ScalarFieldLevel::prePlotLevel()
+{
+  fillAllGhosts();
+  if (m_p.activate_extraction == 1)
+    {
+      //      pout()<<"Hello!"<<endl;
+      Potential potential(m_p.potential_params);
+      ScalarFieldWithPotential scalar_field(potential);
+      BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+      BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
+	                 scalar_field, boosted_bh, m_dx, m_p.extraction_params.extraction_center),
+		     m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    }
 }
 
 // Things to do before outputting a checkpoint file
 void ScalarFieldLevel::preCheckpointLevel()
 {
-    // Calculate matter density function
-    fillAllGhosts();
-    Potential potential(m_p.potential_params);
-    ScalarFieldWithPotential scalar_field(potential);
-    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-    BoxLoops::loop(FixedBGDensity<ScalarFieldWithPotential, BoostedBHFixedBG>(
-                       scalar_field, boosted_bh, m_dx, m_p.center),
-                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    // Calculate matter momentum flux function
+  //    fillAllGhosts();
+  //    Potential potential(m_p.potential_params);
+  //    ScalarFieldWithPotential scalar_field(potential);
+  //    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+  //    BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
+  //                       scalar_field, boosted_bh, m_dx, m_p.extraction_params.extraction_center),
+  //                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do in RHS update, at each RK4 step
@@ -75,7 +121,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
     FixedBGEvolution<ScalarFieldWithPotential, BoostedBHFixedBG> my_evolution(
         scalar_field, boosted_bh, m_p.sigma, m_dx, m_p.center);
-    SetValue set_static_rhs_zero(0.0, Interval(c_chi, c_rho));
+    SetValue set_static_rhs_zero(0.0, Interval(c_chi,c_Stress));
     auto compute_pack = make_compute_pack(my_evolution, set_static_rhs_zero);
     BoxLoops::loop(compute_pack, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 
@@ -89,7 +135,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-    plot_states = {c_phi, c_chi};
+  plot_states = {c_phi, c_chi, c_Stress, c_detSigma};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep
@@ -97,6 +143,8 @@ void ScalarFieldLevel::specificWritePlotHeader(
 void ScalarFieldLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                                const FArrayBox &current_state)
 {
-    BoxLoops::loop(FixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center),
+  BoxLoops::loop(ExtractionFixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center,  m_p.extraction_params),
                    current_state, tagging_criterion, disable_simd());
+  //BoxLoops::loop(FixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center),
+  //		 current_state, tagging_criterion, disable_simd());
 }
