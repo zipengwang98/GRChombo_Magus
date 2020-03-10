@@ -10,7 +10,7 @@
 #include "Coordinates.hpp"
 #include "DimensionDefinitions.hpp"
 #include "FourthOrderDerivatives.hpp"
-#include "SimulationParameters.hpp"
+#include "FixedBGSimulationParametersBase.hpp"
 #include "Tensor.hpp"
 
 class ExtractionFixedGridsTaggingCriterion
