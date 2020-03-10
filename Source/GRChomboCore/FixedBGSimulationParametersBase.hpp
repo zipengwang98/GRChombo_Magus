@@ -21,7 +21,7 @@ struct extraction_params_t
   int num_points_phi;
   int num_points_theta;
   int num_modes;
-  std::vector<std::pair<int, int>> modes; // l = first, m = second                                                                                                         
+  std::vector<std::pair<int, int>> modes; // l = first, m = second
   std::vector<int> extraction_levels;
   bool write_extraction;
   int min_extraction_level;
@@ -42,21 +42,8 @@ class FixedBGSimulationParametersBase : public ChomboParameters
         // for nan check
         pp.load("nan_check", nan_check, 1);
 
-        // Initial and SF data - in sim params
-        //pp.load("scalar_mass", potential_params.scalar_mass);
-	//pp.load("scalar_amplitude", initial_params.amplitude);
-        //pp.load("scalar_width", initial_params.width);
-        //pp.load("scalar_center", initial_params.center, center);
-
         //Dissipation
 	pp.load("sigma", sigma, 0.1);
-
-        // Background boosted bh data - in sim params
-        //pp.load("bh_mass", bg_params.mass);
-        //pp.load("bh_velocity", bg_params.velocity);
-        //pp.load("bh_center", bg_params.center, center);
-
-	//        pp.load("activate_extraction", activate_extraction, 0);
 
 	// extraction params
         dx.fill(coarsest_dx);
