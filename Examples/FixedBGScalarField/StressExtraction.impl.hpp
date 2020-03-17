@@ -135,11 +135,13 @@ StressExtraction::integrate_surface(int es, int el, int em,
                     double z = m_params.extraction_radii[iradius] * cos(theta);
                     //Y_lm_t<double> Y_lm = spin_Y_lm(x, y, z, es, el, em);
                     double integrand_Stress = a_Stress[idx];
-                    double integrand_1 = 1.;
+		    // Should it be a_Stress[iradius* m_num_points] instead??
+                    double integrand_1 = 1.0;
                     // note the multiplication by radius here
-                    double f_theta_phi_Stress = integrand_Stress * a_dArea[idx]; //m_params.extraction_radii[iradius] *
-                                            //integrand_re * sin(theta);
-                    double f_theta_phi_1 = integrand_1 * a_dArea[idx];
+                    double f_theta_phi_Stress = 1.0 * a_dArea[iradius* m_num_points];
+		    // Above should be integrand_Stress * a_dArea[iradius* m_num_points];
+		    // To compare with r*sin(theta) below
+                    double f_theta_phi_1 = m_params.extraction_radii[iradius] * sin(theta);  //a_dArea[idx];
                     inner_integral_Stress += m_dtheta * f_theta_phi_Stress;
                     inner_integral_1 += m_dtheta * f_theta_phi_1;
                 }
@@ -184,8 +186,8 @@ StressExtraction::write_integral(const std::vector<double> a_integral_Stress,
         {
             int iintegral1 = iintegral + 1;
             int iradius = iintegral / 2;
-            header1_strings[iintegral] = "integral Re";
-            header1_strings[iintegral1] = "integral Im";
+            header1_strings[iintegral] = "integral Stress dAread";
+            header1_strings[iintegral1] = "integral dArea";
             header2_strings[iintegral1] = header2_strings[iintegral] =
                 std::to_string(m_params.extraction_radii[iradius]);
         }
