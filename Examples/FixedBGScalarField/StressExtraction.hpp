@@ -12,7 +12,7 @@
 #include "SimulationParameters.hpp"
 #include "SmallDataIO.hpp" // for writing data
 #include "SphericalHarmonics.hpp"
-#include "UserVariables.hpp" // Needs c_Stress and c_detSigma
+#include "UserVariables.hpp" // Needs c_Stress and c_dArea
 //!  The class allows extraction of the values of the Stress scalar components on
 //!  spherical shells at specified radii, and integration over those shells
 /*!
@@ -26,7 +26,7 @@ class StressExtraction
     //! Params for extraction
     const extraction_params_t m_params;
     const int m_Stress = c_Stress;
-    const int m_dArea = c_detSigma;
+    const int m_dArea = c_dArea;
     const double m_dt;
     const double m_time;
     const bool m_first_step;
@@ -68,19 +68,19 @@ class StressExtraction
     //! extraction radius and normalise by multiplying by radius
     std::pair<std::vector<double>, std::vector<double>>
     integrate_surface(int es, int el, int em,
-                      const std::vector<double> a_Stress,
-                      const std::vector<double> a_dArea) const;
+                      const std::vector<double> a_Stress_1,
+                      const std::vector<double> a_Stress_2) const;
 
     //! Write out calculated values of integral for each extraction radius
-    void write_integral(const std::vector<double> a_integral_Stress,
-                        const std::vector<double> a_integral_dArea,
+    void write_integral(const std::vector<double> a_integral_Stress_1,
+                        const std::vector<double> a_integral_Stress_2,
                         std::string a_filename) const;
 
     //! Write out the result of the extraction in phi and theta at each timestep
     //! for each extraction radius
     void write_extraction(std::string a_file_prefix,
-                          const std::vector<double> a_Stress,
-                          const std::vector<double> a_dArea) const;
+                          const std::vector<double> a_Stress_1,
+                          const std::vector<double> a_Stress_2) const;
 };
 
 #include "StressExtraction.impl.hpp"

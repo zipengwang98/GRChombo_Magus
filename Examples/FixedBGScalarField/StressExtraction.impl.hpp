@@ -91,8 +91,8 @@ StressExtraction::integrate_surface(int es, int el, int em,
 #else
     rank = 0;
 #endif
-    std::vector<double> integral_Stress(m_params.num_extraction_radii, 0.);
-    std::vector<double> integral_1(m_params.num_extraction_radii, 0.);
+    std::vector<double> integral_Stress_1(m_params.num_extraction_radii, 0.);
+    std::vector<double> integral_Stress_2(m_params.num_extraction_radii, 0.);
 
     // only rank 0 does the integral, but use OMP threads if available
     if (rank == 0)
@@ -105,26 +105,26 @@ StressExtraction::integrate_surface(int es, int el, int em,
         // of vector) is equal to the first point
 #ifdef _OPENMP
 #if __GNUC__ > 8
-#define OPENMP_CONST_SHARED shared(a_Stress, a_dArea)
+#define OPENMP_CONST_SHARED shared(a_Stress_1, a_Stress_2)
 #else
 #define OPENMP_CONST_SHARED
 #endif
 #pragma omp parallel for collapse(2) default(none)                             \
-    shared(es, el, em, integral_Stress, integral_1) OPENMP_CONST_SHARED
+    shared(es, el, em, integral_Stress_1, integral_Stress_2) OPENMP_CONST_SHARED
 #undef OPENMP_CONST_SHARED
 #endif
         for (int iradius = 0; iradius < m_params.num_extraction_radii;
              ++iradius)
+	  //using namespace SphericalHarmonics;
         {
-            for (int iphi = 0; iphi < m_params.num_points_phi; ++iphi)
+	  for (int iphi = 0; iphi < m_params.num_points_phi/2; ++iphi)
             {
                 double phi = iphi * m_dphi;
                 double inner_integral_Stress = 0.;
-                double inner_integral_1 = 0.;
                 for (int itheta = 0; itheta < m_params.num_points_theta;
                      itheta++)
                 {
-                    using namespace SphericalHarmonics;
+		  using namespace SphericalHarmonics;
                     double theta = (itheta + 0.5) * m_dtheta;
                     int idx = iradius * m_num_points +
                               itheta * m_params.num_points_phi + iphi;
@@ -133,36 +133,37 @@ StressExtraction::integrate_surface(int es, int el, int em,
                     double y = m_params.extraction_radii[iradius] * sin(theta) *
                                sin(phi);
                     double z = m_params.extraction_radii[iradius] * cos(theta);
-                    //Y_lm_t<double> Y_lm = spin_Y_lm(x, y, z, es, el, em);
+             
                     double integrand_Stress = a_Stress[idx];
-		    // Should it be a_Stress[iradius* m_num_points] instead??
-                    double integrand_1 = 1.0;
-                    // note the multiplication by radius here
-                    double f_theta_phi_Stress = 1.0 * a_dArea[iradius* m_num_points];
-		    // Above should be integrand_Stress * a_dArea[iradius* m_num_points];
-		    // To compare with r*sin(theta) below
-                    double f_theta_phi_1 = m_params.extraction_radii[iradius] * sin(theta);  //a_dArea[idx];
+                    double f_theta_phi_Stress = integrand_Stress * a_dArea[idx];
+	
                     inner_integral_Stress += m_dtheta * f_theta_phi_Stress;
-                    inner_integral_1 += m_dtheta * f_theta_phi_1;
                 }
+
+		if (iphi < m_params.num_points_phi/2)
+		  {
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-                integral_Stress[iradius] += m_dphi * inner_integral_Stress;
+		    integral_Stress_1[iradius] += m_dphi * inner_integral_Stress;
+		  }
+		else
+		  {
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-                integral_1[iradius] += m_dphi * inner_integral_1;
+		    integral_Stress_2[iradius] += m_dphi * inner_integral_Stress;
+		  }
             }
         }
     }
-    return std::make_pair(integral_Stress, integral_1);
+    return std::make_pair(integral_Stress_1, integral_Stress_2);
 }
 
 //! Write out calculated value of integral for each extraction radius
 inline void
-StressExtraction::write_integral(const std::vector<double> a_integral_Stress,
-                               const std::vector<double> a_integral_dArea,
+StressExtraction::write_integral(const std::vector<double> a_integral_Stress_1,
+                               const std::vector<double> a_integral_Stress_2,
                                std::string a_filename) const
 {
     CH_TIME("StressExtraction::write_integral");
@@ -186,8 +187,8 @@ StressExtraction::write_integral(const std::vector<double> a_integral_Stress,
         {
             int iintegral1 = iintegral + 1;
             int iradius = iintegral / 2;
-            header1_strings[iintegral] = "integral Stress dAread";
-            header1_strings[iintegral1] = "integral dArea";
+            header1_strings[iintegral] = "integral Stress (back)";
+            header1_strings[iintegral1] = "integral Stress (front)";
             header2_strings[iintegral1] = header2_strings[iintegral] =
                 std::to_string(m_params.extraction_radii[iradius]);
         }
@@ -204,8 +205,8 @@ StressExtraction::write_integral(const std::vector<double> a_integral_Stress,
     {
         int iintegral1 = iintegral + 1;
         int iradius = iintegral / 2;
-        data_for_writing[iintegral] = a_integral_Stress[iradius];
-        data_for_writing[iintegral1] = a_integral_dArea[iradius];
+        data_for_writing[iintegral] = a_integral_Stress_1[iradius];
+        data_for_writing[iintegral1] = a_integral_Stress_2[iradius];
     }
 
     // write data
