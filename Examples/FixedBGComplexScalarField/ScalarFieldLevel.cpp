@@ -49,7 +49,8 @@ void ScalarFieldLevel::initialData()
     // First set everything to zero ... we don't want undefined values in
     // constraints etc, then initial conditions for scalar field
     BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-    ScalarConstant initial_sf(m_p.initial_params);
+    ScalarConstant initial_sf(m_p.scalar_amplitude, m_p.scalar_mass, m_p.center,
+			      m_p.bg_params, m_dx);
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boosted_bh, initial_sf),
                    m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
 }
@@ -61,7 +62,7 @@ void ScalarFieldLevel::specificPostTimeStep()
     {
       // Populate the Stress values on the grid
       fillAllGhosts();
-      ComplexPotential potential(m_p.potential_params);
+      ComplexPotential potential(m_p.scalar_mass);
       ScalarFieldWithPotential scalar_field(potential);
       BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
       BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
@@ -87,7 +88,7 @@ void ScalarFieldLevel::prePlotLevel()
   if (m_p.activate_extraction == 1)
     {
       //      pout()<<"Hello!"<<endl;
-      ComplexPotential potential(m_p.potential_params);
+      ComplexPotential potential(m_p.scalar_mass);
       ScalarFieldWithPotential scalar_field(potential);
       BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
       BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
@@ -116,7 +117,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     // Calculate right hand side with matter_t = ScalarField
     // and background_t = BoostedBH
     // RHS for non evolution vars is zero, to prevent undefined values
-    ComplexPotential potential(m_p.potential_params);
+    ComplexPotential potential(m_p.scalar_mass);
     ScalarFieldWithPotential scalar_field(potential);
     BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
     FixedBGEvolution<ScalarFieldWithPotential, BoostedBHFixedBG> my_evolution(

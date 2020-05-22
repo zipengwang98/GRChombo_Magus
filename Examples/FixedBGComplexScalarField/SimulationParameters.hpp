@@ -26,8 +26,9 @@ public:
     void readParams(GRParmParse &pp)
     {
         // Initial and SF data
-        pp.load("scalar_mass", potential_params.scalar_mass);
-        pp.load("scalar_amplitude", initial_params.amplitude);
+        pp.load("scalar_mass", scalar_mass);
+        pp.load("scalar_amplitude", scalar_amplitude);
+	//pp.load("scalar_center", initial_params.center, center);
 
         // Background boosted bh data
         pp.load("bh_mass", bg_params.mass);
@@ -39,9 +40,10 @@ public:
 
     // Initial data for matter, metric and potential
     int activate_extraction;
+    double scalar_mass, scalar_amplitude;
     BoostedBHFixedBG::params_t bg_params;
-    ScalarConstant::params_t initial_params;
-    ComplexPotential::params_t potential_params;
+  //    ScalarConstant::params_t initial_params;
+  //    ComplexPotential::params_t potential_params;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */
