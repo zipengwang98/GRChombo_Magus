@@ -43,11 +43,11 @@ lo_boundary = 0 2 2
 # 0 = even
 # 1,2,3 = odd x, y, z
 # 4,5,6 = odd xy, yz, xz
-vars_parity = 0 0 0 0 0 0 0           #phi_re, phi_im, Pi_re, Pi_im, chi, Stress, detSigma
+vars_parity = 0 0 0 0 0 0 0 0          #phi_re, phi_im, Pi_re, Pi_im, chi, rho, Stress, dArea
 
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
-vars_asymptotic_values = 0 0 0 0 1 0 0   #phi, Pi, chi and Six
+vars_asymptotic_values = 0 0 0 0 1 0 0 0   #phi_re, phi_im, Pi_re, Pi_im, chi, rho, Stress, dArea
 
 # Set up time steps
 # dt will be dx*dt_multiplier on each grid level
