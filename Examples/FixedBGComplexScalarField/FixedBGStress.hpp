@@ -127,16 +127,17 @@ template <class matter_t, class background_t> class FixedBGStress
 	    FOR2(m, n)
 	      {
                 Sigma[i][j] +=
-		  Proj_spher[m][i] * Proj_spher[n][j] * gamma_spher[m][n];
+		  Proj_spher[i][m] * Proj_spher[j][n] * gamma_spher[m][n];
 	      }
 	  }
 
 	//const data_t detSigma = Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1];
 	const data_t dArea = sqrt(Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1]);
-	//pout()<< "S10" << emtensor.Sij[0][1]<<emtensor.Sij[2][1]<<emtensor.Sij[2][3] <<endl;
-	//pout()<< "S01" << emtensor.Sij[1][0]<<emtensor.Sij[1][2]<<emtensor.Sij[3][2] <<endl;
-	//pout()<< "detgamma" << gamma_spher[1][1]*gamma_spher[2][2] - gamma_spher[1][2]*gamma_spher[2][1];
+	//pout()<< "Lapse in stress vars" << metric_vars.lapse <<endl;
+	//pout()<< "Stress" << Stress <<endl;
+	//pout()<< "dArea" << dArea;
         // assign values of Momentum flux in output box
+	current_cell.store_vars(emtensor.rho, c_rho);
         current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);
     }
