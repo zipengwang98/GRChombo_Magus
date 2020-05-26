@@ -61,7 +61,7 @@ public:
         vars.phi_Re = m_amplitude; //* exp(-r * r / m_params.width / m_params.width);
 	vars.phi_Im = 0;
         vars.Pi_Re = 0;
-	vars.Pi_Im = m_amplitude * m_mu; // metric_vars.lapse;
+	vars.Pi_Im = m_amplitude * m_mu / metric_vars.lapse;
         //pout()<< "phi_re" << vars.phi_Re <<endl;
 	//pout()<< "phi_im" << vars.phi_Im <<endl;
 	//pout()<< "Pi_re" << vars.Pi_Re <<endl;

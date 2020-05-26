@@ -10,34 +10,29 @@
 
 class ComplexPotential
 {
-  public:
-    struct params_t
-    {
-        double scalar_mass;
-    };
+protected:
+  const double m_mu;
 
-  private:
-    params_t m_params;
-
-  public:
+public:
     //! The constructor
-    ComplexPotential(params_t a_params) : m_params(a_params) {}
+    ComplexPotential(const double a_mu) : m_mu(a_mu) {}
 
     //! Set the potential function for the scalar field here
     template <class data_t, template <typename> class vars_t>
     void compute_potential(data_t &V_of_phi, data_t &dVdphi_re,
                            data_t &dVdphi_im, const vars_t<data_t> &vars) const
     {
-        const double m = m_params.scalar_mass;
+      //        const double m = m_params.scalar_mass;
         // The potential value at phi
         // 1/2 m^2 phi^2
-        V_of_phi = 0.5 * m * m * vars.phi_Re * vars.phi_Re +
-	           0.5 * m * m * vars.phi_Im * vars.phi_Im;
+        V_of_phi = 0.5 * m_mu * m_mu * vars.phi_Re * vars.phi_Re +
+	           0.5 * m_mu * m_mu * vars.phi_Im * vars.phi_Im;
 
         // The potential gradient at phi
         // m^2 phi
-        dVdphi_re = m * m * vars.phi_Re;
-	dVdphi_im = m * m * vars.phi_Im;
+        dVdphi_re = m_mu * m_mu * vars.phi_Re;
+	dVdphi_im = m_mu * m_mu * vars.phi_Im;
+	//pout()<< "Scalar mass in potential" << m_mu <<endl;
     }
 };
 
