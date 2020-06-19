@@ -12,16 +12,17 @@ enum
     c_phi, // matter field added
     c_Pi,  //(minus) conjugate momentum
     c_chi,
+    c_rho,
     c_Stress,
-    c_detSigma,
+    c_dArea,
 
     NUM_VARS
 };
 
 namespace UserVariables
 {
-static constexpr char const *variable_names[NUM_VARS] = {"phi", "Pi", "chi",
-                                                         "Stress", "detSigma"};
+  static constexpr char const *variable_names[NUM_VARS] = {"phi", "Pi", "chi",
+							   "rho", "Stress", "dArea"};
 }
 
 #endif /* USERVARIABLES_HPP */

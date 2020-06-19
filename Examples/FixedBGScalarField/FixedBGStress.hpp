@@ -65,6 +65,7 @@ template <class matter_t, class background_t> class FixedBGStress
             vars, metric_vars, d1, gamma_UU, chris_phys.ULL);
 	const auto lapse = metric_vars.lapse;
 	const auto shift = metric_vars.shift;
+	const data_t det_gamma = TensorAlgebra::compute_determinant_sym(metric_vars.gamma);
 
         const data_t x = coords.x;
         const double y = coords.y;
@@ -72,66 +73,80 @@ template <class matter_t, class background_t> class FixedBGStress
         const data_t R = coords.get_radius();
 	const auto gamma_spher = cartesian_to_spherical_LL(metric_vars.gamma, x, y, z);
 
-	Tensor<1, data_t> sCart;
-	sCart[0] = x/R;
-	sCart[1] = y/R;
-	sCart[2] = z/R;
+	Tensor<1, data_t> si;
+	si[0] = x/R;
+	si[1] = y/R;
+	si[2] = z/R;
 	
-	data_t sCart_norm = 0.0;
+	data_t si_norm = 0.0;
 	FOR2(j, k)
 	  {
-	    sCart_norm += sCart[j]*sCart[k]*metric_vars.gamma[j][k];
+	    si_norm += si[j]*si[k]*metric_vars.gamma[j][k];
 	  }
-	sCart_norm = sqrt(sCart_norm);
-	Tensor<1, data_t> nCart;
-	FOR1(i)
-	{
-	  nCart[i] = sCart[i]/sCart_norm;
-	}
-
-	Tensor<1, data_t> TUiDx;
-        data_t Stress = 0.0;
-	FOR1(i)
-	{
-	  TUiDx[i] = shift[i]*emtensor.Si[0]*nCart[i]/lapse;
-	  FOR1(j)
-	  {
-	    TUiDx[i] += (metric_vars.gamma[i][j] - shift[i]*shift[j]/pow(lapse,2))*emtensor.Sij[j][0];
-	  }
-	}
 
 	FOR1(i)
 	{
-	  Stress += TUiDx[i]*nCart[i];
+	  si[i] = si[i]/sqrt(si_norm);
 	}
-	Tensor<1, data_t> sSpher;
-        sSpher[0] = 1.0;
-        sSpher[1] = 0.0;
-        sSpher[2] = 0.0;
+
+	data_t Stress = 0.0;
+	FOR1(i)
+	{
+	  Stress += si[i]*emtensor.Sij[i][0];
+	}
+	Tensor<1, data_t> si_spher;
+        si_spher[0] = 1.0/sqrt(gamma_spher[0][0]);
+        si_spher[1] = 0.0;
+        si_spher[2] = 0.0;
 	
-        data_t sSpher_norm = sqrt(gamma_spher[0][0]);
-        Tensor<1, data_t> nSpher; 
-	FOR1(i)
-        {
-          nSpher[i] = sSpher[i]/sSpher_norm;
-        }
+	Tensor<2, data_t> Proj_spher;
 
-	Tensor<2, data_t> Sigma;
 	FOR2(i, j)
 	  {
-	    Sigma[i][j] = gamma_spher[i][j]; //+ gamma_spher[i][0]*gamma_spher[0][j];
-	    FOR2(m,n)
-	    {
-	      Sigma[i][j] += gamma_spher[i][m] * nSpher[m] * gamma_spher[j][n] * nSpher[n];
-	    }
+            Proj_spher[i][j] = delta(i, j);
+	    FOR1(k)
+            {
+                Proj_spher[i][j] += -gamma_spher[i][k] * si_spher[k] * si_spher[j];
+            }
 	  }
 
-	const data_t detSigma = Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1];
+
+        Tensor<2, data_t> Sigma;
+	FOR2(i, j)
+	  {
+            Sigma[i][j] = 0.0;
+	    FOR2(m, n)
+	      {
+                Sigma[i][j] +=
+		  Proj_spher[i][m] * Proj_spher[j][n] * gamma_spher[m][n];
+	      }
+	  }
+
+	Tensor<1, data_t> Ni;
+        Ni[0] = coords.x / R;
+        Ni[1] = coords.y / R;
+        Ni[2] = coords.z / R;
+
+        // The integrand for the x-momentum flux out of a radial
+        // shell at the current position
+        data_t Mdot = 0;
+        FOR1(i)
+        {
+	  Mdot += metric_vars.lapse * emtensor.Sij[0][i] * Ni[i];
+        }
+        Mdot *= sqrt(det_gamma);
+
+        // assign values of conserved density in output box,
+        // including factors of lapse and det_gamma
+        //current_cell.store_vars(Mdot, c_Stress);
+
+	//const data_t detSigma = Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1];
 	const data_t dArea = sqrt(Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1]);
-	//pout()<< "S10" << emtensor.Sij[0][1]<<emtensor.Sij[2][1]<<emtensor.Sij[2][3] <<endl;
-	//pout()<< "S01" << emtensor.Sij[1][0]<<emtensor.Sij[1][2]<<emtensor.Sij[3][2] <<endl;
-	//pout()<< "detgamma" << gamma_spher[1][1]*gamma_spher[2][2] - gamma_spher[1][2]*gamma_spher[2][1];
+	//pout()<< "Lapse in stress vars" << metric_vars.lapse <<endl;
+	//pout()<< "Stress" << Stress <<endl;
+	//pout()<< "dArea" << dArea;
         // assign values of Momentum flux in output box
+	current_cell.store_vars(emtensor.rho, c_rho);
         current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);
     }

@@ -6,9 +6,11 @@
 #ifndef SCALARCONSTANT_HPP_
 #define SCALARCONSTANT_HPP_
 
+#include "ADMFixedBGVars.hpp"
 #include "Cell.hpp"
 #include "Coordinates.hpp"
-#include "ScalarField.hpp"
+#include "FixedBGScalarField.hpp"
+#include "BoostedBHFixedBG.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total no. components
 #include "VarsTools.hpp"
@@ -18,41 +20,57 @@
 //! matter config
 class ScalarConstant
 {
-  public:
-    //! A structure for the input params for scalar field properties and initial
-    //! conditions
-    struct params_t
-    {
-        double amplitude; //!< Amplitude of bump in initial SF bubble
-      //std::array<double, CH_SPACEDIM>
-	//        center;   //!< Centre of perturbation in initial SF bubble
-	//    double width; //!< Width of bump in initial SF bubble
-    };
+  template <class data_t> using MetricVars = ADMFixedBGVars::Vars<data_t>;
 
-    //! The constructor
-    ScalarConstant(params_t a_params)
-        : m_params(a_params)
-    {
-    }
+protected:
+  const double m_dx;
+  const double m_amplitude;
+  const double m_mu;
+  const std::array<double, CH_SPACEDIM> m_center;
+  const BoostedBHFixedBG::params_t m_bg_params;
+
+public:
+  //! The constructor for the class
+  ScalarConstant(const double a_amplitude, const double a_mu,
+		    const std::array<double, CH_SPACEDIM> a_center,
+		    const BoostedBHFixedBG::params_t a_bg_params,
+         	    const double a_dx)
+    : m_amplitude(a_amplitude), m_mu(a_mu), m_center(a_center),
+      m_bg_params(a_bg_params), m_dx(a_dx)
+  {
+  }
 
     //! Function to compute the value of all the initial vars on the grid
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
-        ScalarField<>::Vars<data_t> vars;
-        //Coordinates<data_t> coords(current_cell, m_dx, m_params.center);
+
+        FixedBGScalarField<>::Vars<data_t> vars;
+
+        Coordinates<data_t> coords(current_cell, m_dx, m_center);
+
+        // get the metric vars
+	BoostedBHFixedBG boosted_bh(m_bg_params, m_dx);
+        //BoostedBHFixedBG boosted_bh(m_bg_params, m_dx);
+        MetricVars<data_t> metric_vars;
+        boosted_bh.compute_metric_background(metric_vars, coords); 
+
         //data_t r = coords.get_radius();
+	//const double m = m_params.scalar_mass; // m_params.scalar_mass
 
         // set the field vars
-        vars.phi = m_params.amplitude; //* exp(-r * r / m_params.width / m_params.width);
-        vars.Pi = 0;
-
+        vars.phi = m_amplitude; //* exp(-r * r / m_params.width / m_params.width);
+	vars.Pi = 0;
+	//pout()<< "phi_re" << vars.phi_Re <<endl;
+	//pout()<< "phi_im" << vars.phi_Im <<endl;
+	//pout()<< "Pi_re" << vars.Pi_Re <<endl;
+	//pout()<< "Pi_im" << vars.Pi_Im <<endl;
         // Store the initial values of the variables
         current_cell.store_vars(vars);
     }
 
-  protected:
+  //  protected:
   //double m_dx;
-    const params_t m_params; //!< The matter initial condition params
+  //  const params_t m_params; //!< The matter initial condition params
 };
 
 #endif /* SCALARCONSTANT_HPP_ */

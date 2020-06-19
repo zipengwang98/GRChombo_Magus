@@ -27,6 +27,7 @@ class StressExtraction
     const extraction_params_t m_params;
     const int m_Stress = c_Stress;
     const int m_dArea = c_dArea;
+  //const int m_rho = c_rho;
     const double m_dt;
     const double m_time;
     const bool m_first_step;
@@ -68,8 +69,8 @@ class StressExtraction
     //! extraction radius and normalise by multiplying by radius
     std::pair<std::vector<double>, std::vector<double>>
     integrate_surface(int es, int el, int em,
-                      const std::vector<double> a_Stress_1,
-                      const std::vector<double> a_Stress_2) const;
+                      const std::vector<double> a_Stress,
+                      const std::vector<double> a_dArea) const;
 
     //! Write out calculated values of integral for each extraction radius
     void write_integral(const std::vector<double> a_integral_Stress_1,
@@ -79,8 +80,8 @@ class StressExtraction
     //! Write out the result of the extraction in phi and theta at each timestep
     //! for each extraction radius
     void write_extraction(std::string a_file_prefix,
-                          const std::vector<double> a_Stress_1,
-                          const std::vector<double> a_Stress_2) const;
+                          const std::vector<double> a_Stress,
+                          const std::vector<double> a_dArea) const;
 };
 
 #include "StressExtraction.impl.hpp"
