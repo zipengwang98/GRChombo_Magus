@@ -65,6 +65,7 @@ template <class matter_t, class background_t> class FixedBGStress
             vars, metric_vars, d1, gamma_UU, chris_phys.ULL);
 	const auto lapse = metric_vars.lapse;
 	const auto shift = metric_vars.shift;
+	const data_t det_gamma = TensorAlgebra::compute_determinant_sym(metric_vars.gamma);
 
         const data_t x = coords.x;
         const double y = coords.y;
@@ -88,16 +89,6 @@ template <class matter_t, class background_t> class FixedBGStress
 	  si[i] = si[i]/sqrt(si_norm);
 	}
 
-	Tensor<1, data_t> TUiDx;
-	FOR1(i)
-	{
-	  TUiDx[i] = -shift[i]*emtensor.Si[0]/lapse;
-	  FOR1(j)
-	  {
-	    TUiDx[i] += (metric_vars.gamma[i][j] - shift[i]*shift[j]/pow(lapse,2))*emtensor.Sij[j][0];
-	  }
-	}
-
 	data_t Stress = 0.0;
 	FOR1(i)
 	{
@@ -119,6 +110,22 @@ template <class matter_t, class background_t> class FixedBGStress
             }
 	  }
 
+        Tensor<1, data_t> Ni;
+        Ni[0] = coords.x / R / sqrt(si_norm);
+        Ni[1] = coords.y / R / sqrt(si_norm);
+	Ni[2] = coords.z / R / sqrt(si_norm);
+	
+        // The integrand for the x-momentum flux out of a radial                                       
+	// shell at the current position                                                               
+        data_t Mdot = 0;
+        FOR1(i)
+        {
+          Mdot += emtensor.Sij[0][i] * Ni[i];
+        }
+        //Mdot *= sqrt(det_gamma);
+	//Mdot *= det_gamma;
+	const data_t R2sintheta = R*sqrt(x*x + y*y);
+	//Mdot = Mdot/R2sintheta;
 
         Tensor<2, data_t> Sigma;
 	FOR2(i, j)
@@ -130,9 +137,10 @@ template <class matter_t, class background_t> class FixedBGStress
 		  Proj_spher[i][m] * Proj_spher[j][n] * gamma_spher[m][n];
 	      }
 	  }
-
+	
 	//const data_t detSigma = Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1];
 	const data_t dArea = sqrt(Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1]);
+	//Mdot *= 
 	//pout()<< "Lapse in stress vars" << metric_vars.lapse <<endl;
 	//pout()<< "Stress" << Stress <<endl;
 	//pout()<< "dArea" << dArea;

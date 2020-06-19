@@ -77,6 +77,17 @@ void ScalarFieldLevel::specificPostTimeStep()
 	  StressExtraction my_extraction(m_p.extraction_params, m_dt, m_time, m_restart_time);
 	  my_extraction.execute_query(m_gr_amr.m_interpolator);
 	  //  pout()<<"Hello2!"<<endl;
+
+	  std::string avg_filename = "rho_sum";
+          double rho_sum = m_gr_amr.compute_sum(c_rho, m_p.coarsest_dx);
+          SmallDataIO integral_file(avg_filename, m_dt, m_time,
+                                    m_restart_time, SmallDataIO::APPEND, false);
+
+          // remove any duplicate data if this is post restart                                         
+          integral_file.remove_duplicate_time_data();
+	  std::vector<double> data_for_writing = {rho_sum};
+          // write data                                                                                
+          integral_file.write_time_data_line(data_for_writing);
         }
     }
 }
@@ -136,7 +147,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_chi, c_rho, c_Stress, c_dArea};
+  plot_states = {c_phi_Re, c_phi_Im, c_chi, c_rho,  c_Stress, c_dArea};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep

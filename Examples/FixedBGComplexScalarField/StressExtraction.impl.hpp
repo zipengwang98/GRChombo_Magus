@@ -82,7 +82,7 @@ inline void StressExtraction::execute_query(
 inline std::pair<std::vector<double>, std::vector<double>>
 StressExtraction::integrate_surface(int es, int el, int em,
                                   const std::vector<double> a_Stress,
-                                  const std::vector<double> a_dArea) const
+				  const std::vector<double> a_dArea) const
 {
     CH_TIME("StressExtraction::integrate_surface");
     int rank;
@@ -105,7 +105,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
         // of vector) is equal to the first point
 #ifdef _OPENMP
 #if __GNUC__ > 8
-#define OPENMP_CONST_SHARED shared(a_Stress_1, a_Stress_2)
+#define OPENMP_CONST_SHARED shared(a_Stress, a_dArea)
 #else
 #define OPENMP_CONST_SHARED
 #endif
@@ -117,7 +117,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
              ++iradius)
 	  //using namespace SphericalHarmonics;
         {
-	  for (int iphi = 1; iphi < m_params.num_points_phi; ++iphi)
+	  for (int iphi = 0; iphi < m_params.num_points_phi; ++iphi)
             {
                 double phi = iphi * m_dphi;
                 double inner_integral_Stress = 0.;
@@ -135,27 +135,28 @@ StressExtraction::integrate_surface(int es, int el, int em,
                     double z = m_params.extraction_radii[iradius] * cos(theta);
              
                     double integrand_Stress = a_Stress[idx];
+		    double r2sintheta =  m_params.extraction_radii[iradius] *  m_params.extraction_radii[iradius] * sin(theta);
                     double f_theta_phi_Stress = integrand_Stress * a_dArea[idx];
 	
                     inner_integral_Stress += m_dtheta * f_theta_phi_Stress;
                 }
 
-		if (iphi < m_params.num_points_phi/2)
-		  {
+		//if (iphi < m_params.num_points_phi/2)
+		//{
 		    //pout()<< "first-half" <<iphi<<m_dphi<<endl;
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-		    integral_Stress_1[iradius] += -m_dphi * inner_integral_Stress;
-		   }
-		 else
-		   {
+		integral_Stress_1[iradius] += m_dphi * inner_integral_Stress;
+		    // }
+		// else
+		//   {
 		     //pout()<< "second-half" <<iphi<<m_dphi<<endl;
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-		    integral_Stress_2[iradius] += -m_dphi * inner_integral_Stress;
-		    }
+		integral_Stress_2[iradius] += m_dphi * inner_integral_Stress;
+		    //}
             }
         }
     }
@@ -219,8 +220,8 @@ StressExtraction::write_integral(const std::vector<double> a_integral_Stress_1,
 //! each extraction radius
 inline void
 StressExtraction::write_extraction(std::string a_file_prefix,
-                                 const std::vector<double> a_Stress,
-                                 const std::vector<double> a_dArea) const
+                                   const std::vector<double> a_Stress,
+				   const std::vector<double> a_dArea) const
 {
     CH_TIME("StressExtraction::write_extraction");
     SmallDataIO extraction_file(a_file_prefix, m_dt, m_time, m_restart_time,
