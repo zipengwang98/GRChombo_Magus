@@ -120,7 +120,8 @@ StressExtraction::integrate_surface(int es, int el, int em,
 	  for (int iphi = 0; iphi < m_params.num_points_phi; ++iphi)
             {
                 double phi = iphi * m_dphi;
-                double inner_integral_Stress = 0.;
+                double inner_integral_Stress1 = 0.;
+		double inner_integral_Stress2 = 0.;
                 for (int itheta = 0; itheta < m_params.num_points_theta;
                      itheta++)
                 {
@@ -134,11 +135,14 @@ StressExtraction::integrate_surface(int es, int el, int em,
                                sin(phi);
                     double z = m_params.extraction_radii[iradius] * cos(theta);
              
-                    double integrand_Stress = a_Stress[idx];
+                    double integrand_Stress1 = a_Stress[idx];
+		    double integrand_Stress2 = a_dArea[idx];
 		    double r2sintheta =  m_params.extraction_radii[iradius] *  m_params.extraction_radii[iradius] * sin(theta);
-                    double f_theta_phi_Stress = integrand_Stress * a_dArea[idx];
-	
-                    inner_integral_Stress += m_dtheta * f_theta_phi_Stress;
+                    double f_theta_phi_Stress1 = integrand_Stress1 * r2sintheta;
+		    double f_theta_phi_Stress2 = integrand_Stress2 * r2sintheta;
+
+                    inner_integral_Stress1 += m_dtheta * f_theta_phi_Stress1;
+		    inner_integral_Stress2 += m_dtheta * f_theta_phi_Stress2;
                 }
 
 		//if (iphi < m_params.num_points_phi/2)
@@ -147,7 +151,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-	        integral_Stress_1[iradius] += -m_dphi * inner_integral_Stress;
+	        integral_Stress_1[iradius] += m_dphi * inner_integral_Stress1;
 		    //   }
 		    //else
 		    //{
@@ -155,7 +159,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-		integral_Stress_2[iradius] += m_dphi * inner_integral_Stress;
+		integral_Stress_2[iradius] += m_dphi * inner_integral_Stress2;
 		    //}
             }
         }
