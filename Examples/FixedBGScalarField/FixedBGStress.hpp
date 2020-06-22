@@ -145,14 +145,13 @@ template <class matter_t, class background_t> class FixedBGStress
 
 	//const data_t detSigma = Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1];
 	const data_t dArea = sqrt(Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1]);
-	Stress *= dArea / r2sintheta; 
 	//pout()<< "Lapse in stress vars" << metric_vars.lapse <<endl;
 	//pout()<< "Stress" << Stress <<endl;
 	//pout()<< "dArea" << dArea;
         // assign values of Momentum flux in output box
 	current_cell.store_vars(emtensor.rho, c_rho);
         current_cell.store_vars(Stress, c_Stress);
-	current_cell.store_vars(Mdot, c_dArea);
+	current_cell.store_vars(dArea, c_dArea);
     }
 };
 
