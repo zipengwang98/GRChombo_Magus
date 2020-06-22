@@ -110,23 +110,6 @@ template <class matter_t, class background_t> class FixedBGStress
             }
 	  }
 
-        Tensor<1, data_t> Ni;
-        Ni[0] = coords.x / R / sqrt(si_norm);
-        Ni[1] = coords.y / R / sqrt(si_norm);
-	Ni[2] = coords.z / R / sqrt(si_norm);
-	
-        // The integrand for the x-momentum flux out of a radial                                       
-	// shell at the current position                                                               
-        data_t Mdot = 0;
-        FOR1(i)
-        {
-          Mdot += emtensor.Sij[0][i] * Ni[i];
-        }
-        //Mdot *= sqrt(det_gamma);
-	//Mdot *= det_gamma;
-	const data_t R2sintheta = R*sqrt(x*x + y*y);
-	//Mdot = Mdot/R2sintheta;
-
         Tensor<2, data_t> Sigma;
 	FOR2(i, j)
 	  {

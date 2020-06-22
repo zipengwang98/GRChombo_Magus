@@ -37,7 +37,7 @@ inline void StressExtraction::execute_query(
             int iphi = idx % m_params.num_points_phi;
             // don't put a point at z = 0
             double theta = (itheta + 0.5) * m_dtheta;
-            double phi = iphi * m_dphi;
+            double phi = (iphi + 0.5) * m_dphi;
             interp_x[iradius * m_num_points + idx] =
                 m_params.extraction_center[0] +
                 m_params.extraction_radii[iradius] * sin(theta) * cos(phi);
@@ -47,7 +47,7 @@ inline void StressExtraction::execute_query(
             interp_z[iradius * m_num_points + idx] =
                 m_params.extraction_center[2] +
                 m_params.extraction_radii[iradius] * cos(theta);
-        }
+	}
     }
     // set up the query
     InterpolationQuery query(m_num_points * m_params.num_extraction_radii);
@@ -119,7 +119,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
         {
 	  for (int iphi = 0; iphi < m_params.num_points_phi; ++iphi)
             {
-                double phi = iphi * m_dphi;
+	      double phi = (iphi + 0.5) * m_dphi;
                 double inner_integral_Stress = 0.;
                 for (int itheta = 0; itheta < m_params.num_points_theta;
                      itheta++)
@@ -133,24 +133,25 @@ StressExtraction::integrate_surface(int es, int el, int em,
                     double y = m_params.extraction_radii[iradius] * sin(theta) *
                                sin(phi);
                     double z = m_params.extraction_radii[iradius] * cos(theta);
-             
-                    double integrand_Stress = a_Stress[idx];
-		    double r2sintheta =  m_params.extraction_radii[iradius] *  m_params.extraction_radii[iradius] * sin(theta);
-                    double f_theta_phi_Stress = integrand_Stress * a_dArea[idx];
 	
+                    double integrand_Stress = a_Stress[idx];
+		    double dA = a_dArea[idx];
+		    double r2sintheta =  m_params.extraction_radii[iradius] *  m_params.extraction_radii[iradius] * sin(theta);
+                    double f_theta_phi_Stress = integrand_Stress * dA;
+
                     inner_integral_Stress += m_dtheta * f_theta_phi_Stress;
                 }
 
 		//if (iphi < m_params.num_points_phi/2)
-		//{
+		//  {
 		    //pout()<< "first-half" <<iphi<<m_dphi<<endl;
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-		integral_Stress_1[iradius] += m_dphi * inner_integral_Stress;
-		    // }
-		// else
-		//   {
+	        integral_Stress_1[iradius] += m_dphi * inner_integral_Stress;
+		    //   }
+		    //else
+		    //{
 		     //pout()<< "second-half" <<iphi<<m_dphi<<endl;
 #ifdef _OPENMP
 #pragma omp atomic
@@ -190,8 +191,8 @@ StressExtraction::write_integral(const std::vector<double> a_integral_Stress_1,
         {
             int iintegral1 = iintegral + 1;
             int iradius = iintegral / 2;
-            header1_strings[iintegral] = "integral Stress (back)";
-            header1_strings[iintegral1] = "integral Stress (front)";
+            header1_strings[iintegral] = "integral Stress";
+            header1_strings[iintegral1] = "integral Stress";
             header2_strings[iintegral1] = header2_strings[iintegral] =
                 std::to_string(m_params.extraction_radii[iradius]);
         }
