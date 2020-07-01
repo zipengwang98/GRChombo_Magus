@@ -121,6 +121,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
             {
 	      double phi = (iphi + 0.5) * m_dphi;
                 double inner_integral_Stress = 0.;
+		double inner_integral_Stress2 = 0.;
                 for (int itheta = 0; itheta < m_params.num_points_theta;
                      itheta++)
                 {
@@ -140,6 +141,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
                     double f_theta_phi_Stress = integrand_Stress * dA;
 
                     inner_integral_Stress += m_dtheta * f_theta_phi_Stress;
+		    inner_integral_Stress2 += m_dtheta * dA;
                 }
 
 		//if (iphi < m_params.num_points_phi/2)
@@ -156,7 +158,7 @@ StressExtraction::integrate_surface(int es, int el, int em,
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-		integral_Stress_2[iradius] += m_dphi * inner_integral_Stress;
+		integral_Stress_2[iradius] += m_dphi * inner_integral_Stress2;
 		    //}
             }
         }

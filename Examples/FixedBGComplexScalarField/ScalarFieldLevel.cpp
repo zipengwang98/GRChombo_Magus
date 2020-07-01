@@ -17,8 +17,8 @@
 #include "FixedBGStress.hpp"
 
 // For tag cells
-#include "ExtractionFixedGridsTaggingCriterion.hpp"
-//#include "FixedGridsTaggingCriterion.hpp"
+//#include "ExtractionFixedGridsTaggingCriterion.hpp"
+#include "FixedGridsTaggingCriterion.hpp"
 
 // Problem specific includes
 #include "ComputePack.hpp"
@@ -53,6 +53,13 @@ void ScalarFieldLevel::initialData()
 			      m_p.bg_params, m_dx);
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boosted_bh, initial_sf),
                    m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
+    
+    // setup the output file
+    //    SmallDataIO integral_file(m_p.sum_filename, m_dt, m_time,
+    //                          m_restart_time, SmallDataIO::APPEND, true);
+    //std::vector<std::string> header_strings = {"rho"};
+    //integral_file.write_header_line(header_strings);
+
 }
 
 void ScalarFieldLevel::specificPostTimeStep()
@@ -66,7 +73,7 @@ void ScalarFieldLevel::specificPostTimeStep()
       ScalarFieldWithPotential scalar_field(potential);
       BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
       BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
-                 scalar_field, boosted_bh, m_dx, m_p.extraction_params.extraction_center),
+                 scalar_field, boosted_bh, m_dx, m_p.center),
                      m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 
       // Do the extraction on the min extraction level
@@ -78,16 +85,16 @@ void ScalarFieldLevel::specificPostTimeStep()
 	  my_extraction.execute_query(m_gr_amr.m_interpolator);
 	  //  pout()<<"Hello2!"<<endl;
 
-	  std::string avg_filename = "rho_sum";
-          double rho_sum = m_gr_amr.compute_sum(c_rho, m_p.coarsest_dx);
-          SmallDataIO integral_file(avg_filename, m_dt, m_time,
-                                    m_restart_time, SmallDataIO::APPEND, false);
+	  //std::string avg_filename = "rho_sum";
+          //double rho_sum = m_gr_amr.compute_sum(c_rho, m_p.coarsest_dx);
+          //SmallDataIO integral_file(avg_filename, m_dt, m_time,
+	  //                                m_restart_time, SmallDataIO::APPEND, false);
 
           // remove any duplicate data if this is post restart                                         
-          integral_file.remove_duplicate_time_data();
-	  std::vector<double> data_for_writing = {rho_sum};
+          //integral_file.remove_duplicate_time_data();
+	  //std::vector<double> data_for_writing = {rho_sum};
           // write data                                                                                
-          integral_file.write_time_data_line(data_for_writing);
+          //integral_file.write_time_data_line(data_for_writing);
         }
     }
 }
@@ -95,17 +102,17 @@ void ScalarFieldLevel::specificPostTimeStep()
 // Things to do before a plot level - need to calculate the Stress
 void ScalarFieldLevel::prePlotLevel()
 {
-  fillAllGhosts();
-  if (m_p.activate_extraction == 1)
-    {
+  //  fillAllGhosts();
+  //if (m_p.activate_extraction == 1)
+  //  {
       //      pout()<<"Hello!"<<endl;
-      ComplexPotential potential(m_p.scalar_mass);
-      ScalarFieldWithPotential scalar_field(potential);
-      BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-      BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
-	                 scalar_field, boosted_bh, m_dx, m_p.extraction_params.extraction_center),
-		     m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
-    }
+  //    ComplexPotential potential(m_p.scalar_mass);
+  //    ScalarFieldWithPotential scalar_field(potential);
+  //    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+  //    BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
+  //	                 scalar_field, boosted_bh, m_dx, m_p.center),
+  //		     m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+  //}
 }
 
 // Things to do before outputting a checkpoint file
@@ -147,7 +154,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_chi, c_rho,  c_Stress, c_dArea};
+  plot_states = {c_phi_Re, c_phi_Im, c_chi, c_rho, c_Stress, c_dArea};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep
@@ -155,8 +162,8 @@ void ScalarFieldLevel::specificWritePlotHeader(
 void ScalarFieldLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                                const FArrayBox &current_state)
 {
-  BoxLoops::loop(ExtractionFixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center,  m_p.extraction_params),
-                   current_state, tagging_criterion, disable_simd());
-  //BoxLoops::loop(FixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center),
-  //		 current_state, tagging_criterion, disable_simd());
+  //  BoxLoops::loop(ExtractionFixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center,  m_p.extraction_params),
+  //                 current_state, tagging_criterion, disable_simd());
+  BoxLoops::loop(FixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center),
+  		 current_state, tagging_criterion, disable_simd());
 }

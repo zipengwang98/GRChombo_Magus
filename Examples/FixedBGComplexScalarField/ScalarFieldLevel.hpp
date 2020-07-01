@@ -40,10 +40,10 @@ class ScalarFieldLevel : public GRAMRLevel
                                  const double a_time);
 
     // to do post each time step on every level
-    virtual void specificPostTimeStep() override;
+    virtual void specificPostTimeStep();
 
     // Any actions that should happen just before plot files output 
-    virtual void prePlotLevel() override;
+    virtual void prePlotLevel();
 
     //! Specify which variables to write at plot intervals
     virtual void specificWritePlotHeader(std::vector<int> &plot_states) const;
