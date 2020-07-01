@@ -94,42 +94,10 @@ template <class matter_t, class background_t> class FixedBGStress
 	{
 	  Stress += si[i]*emtensor.Sij[i][0];
 	}
-	Tensor<1, data_t> si_spher;
-        si_spher[0] = 1.0/sqrt(gamma_spher[0][0]);
-        si_spher[1] = 0.0;
-        si_spher[2] = 0.0;
-	
-	Tensor<2, data_t> Proj_spher;
 
-	FOR2(i, j)
-	  {
-            Proj_spher[i][j] = delta(i, j);
-	    FOR1(k)
-            {
-                Proj_spher[i][j] += -gamma_spher[i][k] * si_spher[k] * si_spher[j];
-            }
-	  }
-
-        Tensor<2, data_t> Sigma;
-	FOR2(i, j)
-	  {
-            Sigma[i][j] = 0.0;
-	    FOR2(m, n)
-	      {
-                Sigma[i][j] +=
-		  Proj_spher[i][m] * Proj_spher[j][n] * gamma_spher[m][n];
-	      }
-	  }
-	
-	//const data_t detSigma = Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1];
-	const data_t dArea = sqrt(Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1]);
-	//Mdot *= 
-	//pout()<< "Lapse in stress vars" << metric_vars.lapse <<endl;
-	//pout()<< "Stress" << Stress <<endl;
-	//pout()<< "dArea" << dArea;
-        // assign values of Momentum flux in output box
+	const auto dArea = area_element_sphere(gamma_spher, x, y, z);
 	current_cell.store_vars(emtensor.rho, c_rho);
-        current_cell.store_vars(Stress, c_Stress);
+        current_cell.store_vars(dArea_tr, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);
     }
 };

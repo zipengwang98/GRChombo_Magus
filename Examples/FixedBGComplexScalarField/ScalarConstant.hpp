@@ -50,29 +50,17 @@ public:
 
         // get the metric vars
 	BoostedBHFixedBG boosted_bh(m_bg_params, m_dx);
-        //BoostedBHFixedBG boosted_bh(m_bg_params, m_dx);
         MetricVars<data_t> metric_vars;
         boosted_bh.compute_metric_background(metric_vars, coords); 
 
-        //data_t r = coords.get_radius();
-	//const double m = m_params.scalar_mass; // m_params.scalar_mass
-
         // set the field vars
-        vars.phi_Re = m_amplitude; //* exp(-r * r / m_params.width / m_params.width);
+        vars.phi_Re = m_amplitude;
 	vars.phi_Im = 0;
         vars.Pi_Re = 0;
-	vars.Pi_Im = m_amplitude * m_mu / metric_vars.lapse;
-        //pout()<< "phi_re" << vars.phi_Re <<endl;
-	//pout()<< "phi_im" << vars.phi_Im <<endl;
-	//pout()<< "Pi_re" << vars.Pi_Re <<endl;
-	//pout()<< "Pi_im" << vars.Pi_Im <<endl;
-        // Store the initial values of the variables
+	vars.Pi_Im = m_amplitude * m_mu; // metric_vars.lapse;
+
         current_cell.store_vars(vars);
     }
-
-  //  protected:
-  //double m_dx;
-  //  const params_t m_params; //!< The matter initial condition params
 };
 
 #endif /* SCALARCONSTANT_HPP_ */
