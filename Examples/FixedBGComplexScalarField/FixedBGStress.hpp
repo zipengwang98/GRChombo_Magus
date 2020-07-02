@@ -97,7 +97,7 @@ template <class matter_t, class background_t> class FixedBGStress
 
 	const auto dArea = area_element_sphere(gamma_spher, x, y, z);
 	current_cell.store_vars(emtensor.rho, c_rho);
-        current_cell.store_vars(dArea_tr, c_Stress);
+        current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);
     }
 };
