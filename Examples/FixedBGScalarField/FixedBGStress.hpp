@@ -94,61 +94,20 @@ template <class matter_t, class background_t> class FixedBGStress
 	{
 	  Stress += si[i]*emtensor.Sij[i][0];
 	}
-	Tensor<1, data_t> si_spher;
-        si_spher[0] = 1.0/sqrt(gamma_spher[0][0]);
-        si_spher[1] = 0.0;
-        si_spher[2] = 0.0;
 	
-	Tensor<2, data_t> Proj_spher;
 
-	FOR2(i, j)
-	  {
-            Proj_spher[i][j] = delta(i, j);
-	    FOR1(k)
-            {
-                Proj_spher[i][j] += -gamma_spher[i][k] * si_spher[k] * si_spher[j];
-            }
-	  }
+	const auto dArea = area_element_sphere(gamma_spher, x, y, z);
+	pout()<< "si[0]" << si[0] << endl;
+        pout()<< "si[1]" << si[1] << endl;
+        pout()<< "si[2]" << si[2] << endl;
+        pout()<< "Sij[0][0]" << emtensor.Sij[0][0] <<endl;
+        pout()<< "Sij[1][0]" << emtensor.Sij[1][0] <<endl;
+        pout()<< "Sij[0][1]" << emtensor.Sij[0][1] <<endl;
+        pout()<< "Sij[2][0]" << emtensor.Sij[2][0] <<endl;
+        pout()<< "Sij[0][2]" << emtensor.Sij[0][2] <<endl;
+        pout()<< "Stress" << Stress << endl;
+        pout()<< "dArea" << dArea << endl;
 
-
-        Tensor<2, data_t> Sigma;
-	FOR2(i, j)
-	  {
-            Sigma[i][j] = 0.0;
-	    FOR2(m, n)
-	      {
-                Sigma[i][j] +=
-		  Proj_spher[i][m] * Proj_spher[j][n] * gamma_spher[m][n];
-	      }
-	  }
-
-        Tensor<1, data_t> Ni;
-        Ni[0] = coords.x / R;
-        Ni[1] = coords.y / R;
-        Ni[2] = coords.z / R;
-        data_t mod_N2 = 0.0;
-        FOR2(i, j) { mod_N2 += metric_vars.gamma[i][j] * Ni[i] * Ni[j]; }
-        FOR1(i) { Ni[i] = Ni[i] / sqrt(mod_N2); }
-
-        // the area element of the sphere
-        data_t rho2 = simd_max(coords.x * coords.x + coords.y * coords.y, 1e-12);
-        data_t r2sintheta = sqrt(rho2) * R;
-        data_t det_Sigma = CoordinateTransformations::get_det_spherical_area(metric_vars.gamma, coords.x, coords.y, coords.z);
-
-        // The integrand for the x-momentum flux out of a radial
-        // shell at the current position
-        data_t Mdot = 0;
-        FOR1(i) { Mdot += emtensor.Sij[0][i] * Ni[i]; }
-        // the r2sintheta is taken care of by the integration of the flux
-        // so just need the dA relating to the metric
-	Mdot *= sqrt(det_Sigma) / r2sintheta;
-
-	//const data_t detSigma = Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1];
-	const data_t dArea = sqrt(Sigma[1][1] * Sigma[2][2] - Sigma[1][2] * Sigma[2][1]);
-	//pout()<< "Lapse in stress vars" << metric_vars.lapse <<endl;
-	//pout()<< "Stress" << Stress <<endl;
-	//pout()<< "dArea" << dArea;
-        // assign values of Momentum flux in output box
 	current_cell.store_vars(emtensor.rho, c_rho);
         current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);

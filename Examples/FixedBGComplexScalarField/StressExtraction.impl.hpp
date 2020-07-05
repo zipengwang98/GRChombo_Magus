@@ -117,11 +117,12 @@ StressExtraction::integrate_surface(int es, int el, int em,
              ++iradius)
 	  //using namespace SphericalHarmonics;
         {
+	  double inner_integral_Momx = 0.;
 	  for (int iphi = 0; iphi < m_params.num_points_phi; ++iphi)
             {
 	      double phi = (iphi + 0.5) * m_dphi;
                 double inner_integral_Stress = 0.;
-		double inner_integral_Stress2 = 0.;
+		double f_theta_phi_r_Momx = 0.;
                 for (int itheta = 0; itheta < m_params.num_points_theta;
                      itheta++)
                 {
@@ -136,12 +137,12 @@ StressExtraction::integrate_surface(int es, int el, int em,
                     double z = m_params.extraction_radii[iradius] * cos(theta);
 	
                     double integrand_Stress = a_Stress[idx];
-		    double dA = a_dArea[idx];
+		    double integrand_Momx = a_dArea[idx];
 		    double r2sintheta =  m_params.extraction_radii[iradius] *  m_params.extraction_radii[iradius] * sin(theta);
-                    double f_theta_phi_Stress = integrand_Stress * dA;
-
+                    double f_theta_phi_Stress = integrand_Stress * r2sintheta;
+		    double f_theta_phi_Momx = integrand_Momx * r2sintheta;
                     inner_integral_Stress += m_dtheta * f_theta_phi_Stress;
-		    inner_integral_Stress2 += m_dtheta * dA;
+		    f_theta_phi_r_Momx += m_dtheta * f_theta_phi_Momx;
                 }
 
 		//if (iphi < m_params.num_points_phi/2)
@@ -151,16 +152,17 @@ StressExtraction::integrate_surface(int es, int el, int em,
 #pragma omp atomic
 #endif
 	        integral_Stress_1[iradius] += m_dphi * inner_integral_Stress;
+		inner_integral_Momx += m_dphi * f_theta_phi_r_Momx;
 		    //   }
 		    //else
 		    //{
 		     //pout()<< "second-half" <<iphi<<m_dphi<<endl;
+	    }
 #ifdef _OPENMP
 #pragma omp atomic
 #endif
-		integral_Stress_2[iradius] += m_dphi * inner_integral_Stress2;
+	  integral_Stress_2[iradius] += m_dphi * inner_integral_Momx;
 		    //}
-            }
         }
     }
     return std::make_pair(integral_Stress_1, integral_Stress_2);
@@ -252,7 +254,7 @@ StressExtraction::write_extraction(std::string a_file_prefix,
             int iphi = idx % m_params.num_points_phi;
             // don't put a point at z = 0
             double theta = (itheta + 0.5) * m_dtheta;
-            double phi = iphi * m_dphi;
+            double phi = (iphi + 0.5) * m_dphi;
 
             extraction_file.write_data_line({a_Stress[idx], a_dArea[idx]},
                                             {theta, phi});

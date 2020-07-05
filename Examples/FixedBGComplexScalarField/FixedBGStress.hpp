@@ -92,11 +92,25 @@ template <class matter_t, class background_t> class FixedBGStress
 	data_t Stress = 0.0;
 	FOR1(i)
 	{
-	  Stress += si[i]*emtensor.Sij[i][0];
+	  Stress += si[i]*emtensor.Sij[0][i];
 	}
-
+	
 	const auto dArea = area_element_sphere(gamma_spher, x, y, z);
-	current_cell.store_vars(emtensor.rho, c_rho);
+	data_t rho2 = simd_max(coords.x * coords.x + coords.y * coords.y, 1e-12);
+	data_t r2sintheta = sqrt(rho2) * R;
+	
+	data_t Stress2 = Stress * dArea / r2sintheta; 
+	//pout()<< "si[0]" << si[0] << endl;
+	//pout()<< "si[1]" << si[1] << endl;
+	//pout()<< "si[2]" << si[2] << endl;
+	//pout()<< "Sij[0][0]" << emtensor.Sij[0][0] <<endl;
+	//pout()<< "Sij[1][0]" << emtensor.Sij[1][0] <<endl;
+	//pout()<< "Sij[0][1]" << emtensor.Sij[0][1] <<endl;
+	//pout()<< "Sij[2][0]" << emtensor.Sij[2][0] <<endl;
+	//pout()<< "Sij[0][2]" << emtensor.Sij[0][2] <<endl;
+	//pout()<< "Stress" << Stress << endl;
+	//pout()<< "dArea" << dArea << endl;
+	current_cell.store_vars(emtensor.Si[0], c_Momx);
         current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);
     }

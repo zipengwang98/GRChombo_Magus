@@ -49,7 +49,8 @@ void ScalarFieldLevel::initialData()
     // First set everything to zero ... we don't want undefined values in
     // constraints etc, then initial conditions for scalar field
     BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-    ScalarConstant initial_sf(m_p.scalar_amplitude);
+    ScalarConstant initial_sf(m_p.scalar_amplitude, m_p.scalar_mass, m_p.center,
+      m_p.bg_params, m_dx);
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boosted_bh, initial_sf),
                    m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
 }

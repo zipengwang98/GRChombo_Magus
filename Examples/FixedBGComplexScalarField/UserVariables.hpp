@@ -14,7 +14,7 @@ enum
     c_Pi_Re,  //(minus) conjugate momentum
     c_Pi_Im,
     c_chi,
-    c_rho,
+    c_Momx,
     c_Stress,
     c_dArea,
 
@@ -24,7 +24,7 @@ enum
 namespace UserVariables
 {
   static constexpr char const *variable_names[NUM_VARS] = {"phi_Re", "phi_Im", "Pi_Re", "Pi_Im", "chi",
-							   "rho", "Stress", "dArea"};
+							   "Momx", "Stress", "dArea"};
 }
 
 #endif /* USERVARIABLES_HPP */
