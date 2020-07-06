@@ -250,7 +250,7 @@ StressExtraction::write_extraction(std::string a_file_prefix,
             int iphi = idx % m_params.num_points_phi;
             // don't put a point at z = 0
             double theta = (itheta + 0.5) * m_dtheta;
-            double phi = iphi * m_dphi;
+            double phi = (iphi + 0.5) * m_dphi;
 
             extraction_file.write_data_line({a_Stress[idx], a_dArea[idx]},
                                             {theta, phi});
