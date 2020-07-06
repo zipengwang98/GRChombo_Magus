@@ -110,7 +110,8 @@ template <class matter_t, class background_t> class FixedBGStress
 	//pout()<< "Sij[0][2]" << emtensor.Sij[0][2] <<endl;
 	//pout()<< "Stress" << Stress << endl;
 	//pout()<< "dArea" << dArea << endl;
-	current_cell.store_vars(emtensor.Si[0], c_Momx);
+	current_cell.store_vars(emtensor.rho, c_rho);
+	current_cell.store_vars(emtensor.Si[0], c_Xmom);
         current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);
     }
