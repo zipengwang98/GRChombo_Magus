@@ -54,11 +54,11 @@ void ScalarFieldLevel::initialData()
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boosted_bh, initial_sf),
                    m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
     
-    // setup the output file
-    //    SmallDataIO integral_file(m_p.sum_filename, m_dt, m_time,
-    //                          m_restart_time, SmallDataIO::APPEND, true);
-    //std::vector<std::string> header_strings = {"rho"};
-    //integral_file.write_header_line(header_strings);
+    //setup the output file
+    SmallDataIO integral_file(m_p.integral_filename, m_dt, m_time,
+                              m_restart_time, SmallDataIO::APPEND, true);
+    std::vector<std::string> header_strings = {"rho","Xmom"};
+    integral_file.write_header_line(header_strings);
 
 }
 
@@ -67,45 +67,56 @@ void ScalarFieldLevel::specificPostTimeStep()
   CH_TIME("ScalarFieldLevel::specificPostTimeStep");
   if (m_p.activate_extraction == 1)
     {
-      // Populate the Stress values on the grid
-      fillAllGhosts();
-      ComplexPotential potential(m_p.scalar_mass);
-      ScalarFieldWithPotential scalar_field(potential);
-      BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-      BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
-                 scalar_field, boosted_bh, m_dx, m_p.center),
+      // At any level, but after the coarsest timestep
+      int n = 3;
+      double coarsest_dt = m_p.coarsest_dx * m_p.dt_multiplier / pow(2.0, n);
+      const double remainder = fmod(m_time, coarsest_dt);
+      if (min(abs(remainder), abs(remainder - coarsest_dt)) < 1.0e-8)
+	{
+	  // Populate the Stress values on the grid
+	  fillAllGhosts();
+	  ComplexPotential potential(m_p.scalar_mass);
+	  ScalarFieldWithPotential scalar_field(potential);
+	  BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+	  BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, 
+		     BoostedBHFixedBG>(scalar_field, boosted_bh, m_dx, m_p.center),
                      m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+      
+	  // excise within horizon
+	  //      BoxLoops::loop(ExcisionSF<ScalarFieldWithPotential, 
+	  //	     BoostedBHFixedBG>(m_dx, m_p.center, boosted_bh, true),
+	  //	     m_state_new, m_state_new, SKIP_GHOST_CELLS,
+	  //	     disable_simd());
+	}
 
-      // Do the extraction on the min extraction level
-      if (m_level == m_p.extraction_params.min_extraction_level)
-        {
+      // write out the integral after each coarse timestep
+      if (m_level == n)
+	{
+	  // integrate the densities and write to a file
+	  double rho_sum = m_gr_amr.compute_sum(c_rho, m_p.coarsest_dx);
+	  double Xmom_sum = m_gr_amr.compute_sum(c_Xmom*c_dArea, m_p.coarsest_dx);
+	  
+	  SmallDataIO integral_file(m_p.integral_filename, m_dt, m_time,
+				    m_restart_time, SmallDataIO::APPEND, false);
+	  // remove any duplicate data if this is post restart
+	  integral_file.remove_duplicate_time_data();
+	  std::vector<double> data_for_writing = {rho_sum, Xmom_sum};
+	  // write data
+	  integral_file.write_time_data_line(data_for_writing);
+	  
 	  // Now refresh the interpolator and do the interpolation
 	  m_gr_amr.m_interpolator->refresh();
 	  StressExtraction my_extraction(m_p.extraction_params, m_dt, m_time, m_restart_time);
 	  my_extraction.execute_query(m_gr_amr.m_interpolator);
-	  //  pout()<<"Hello2!"<<endl;
-
-	  //std::string avg_filename = "rho_sum";
-          //double rho_sum = m_gr_amr.compute_sum(c_rho, m_p.coarsest_dx);
-          //SmallDataIO integral_file(avg_filename, m_dt, m_time,
-	  //                                m_restart_time, SmallDataIO::APPEND, false);
-
-          // remove any duplicate data if this is post restart                                         
-          //integral_file.remove_duplicate_time_data();
-	  //std::vector<double> data_for_writing = {rho_sum};
-          // write data                                                                                
-          //integral_file.write_time_data_line(data_for_writing);
-        }
+	} 
     }
 }
-
 // Things to do before a plot level - need to calculate the Stress
 void ScalarFieldLevel::prePlotLevel()
 {
   //  fillAllGhosts();
   //if (m_p.activate_extraction == 1)
   //  {
-      //      pout()<<"Hello!"<<endl;
   //    ComplexPotential potential(m_p.scalar_mass);
   //    ScalarFieldWithPotential scalar_field(potential);
   //    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
@@ -118,14 +129,6 @@ void ScalarFieldLevel::prePlotLevel()
 // Things to do before outputting a checkpoint file
 void ScalarFieldLevel::preCheckpointLevel()
 {
-    // Calculate matter momentum flux function
-  //    fillAllGhosts();
-  //    Potential potential(m_p.potential_params);
-  //    ScalarFieldWithPotential scalar_field(potential);
-  //    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-  //    BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
-  //                       scalar_field, boosted_bh, m_dx, m_p.extraction_params.extraction_center),
-  //                   m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do in RHS update, at each RK4 step

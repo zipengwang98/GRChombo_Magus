@@ -17,7 +17,7 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     const vars_t<data_t> &vars, const MetricVars<data_t> &metric_vars,
     const vars_t<Tensor<1, data_t>> &d1, const Tensor<2, data_t> &gamma_UU,
     const Tensor<3, data_t> &chris_phys_ULL) const
-{
+  {
     // The total em tensor
     emtensor_t<data_t> out;
 
@@ -26,22 +26,18 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     // Useful quantity Vt
     data_t Vt = -vars.Pi_Re * vars.Pi_Re - vars.Pi_Im * vars.Pi_Im;
     FOR2(i, j)
-    {
+      {
         Vt += gamma_UU[i][j] * d1.phi_Re[i] * d1.phi_Re[j] +
-              gamma_UU[i][j] * d1.phi_Im[i] * d1.phi_Im[j];
-    }
-
+	      gamma_UU[i][j] * d1.phi_Im[i] * d1.phi_Im[j];
+      }
     // Calculate components of EM Tensor
     // S_ij = T_ij
     FOR2(i, j)
-    {
-        out.Sij[i][j] = 
-	  -0.5 * metric_vars.gamma[i][j] * Vt + d1.phi_Re[i] * d1.phi_Re[j] -
-	  0.5 * metric_vars.gamma[i][j] * Vt + d1.phi_Im[i] * d1.phi_Im[j];
-	  //-0.5 * metric_vars.gamma[i][j] * Vt +
-          //              d1.phi_Re[i] * d1.phi_Re[j] +
-          //              d1.phi_Im[i] * d1.phi_Im[j];
-    }
+      {
+        out.Sij[i][j] =
+            -0.5 * metric_vars.gamma[i][j] * Vt + d1.phi_Re[i] * d1.phi_Re[j] -
+       	     0.5 * metric_vars.gamma[i][j] * Vt + d1.phi_Im[i] * d1.phi_Im[j];
+      }
 
     // S = Tr_S_ij
     out.S = TensorAlgebra::compute_trace(out.Sij, gamma_UU);
@@ -64,10 +60,7 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     // calculate total emtensor including potential terms
     out.rho = out.rho + V_of_phi;
     out.S = out.S - 3.0 * V_of_phi;
-    FOR2(i, j)
-    {
-        out.Sij[i][j] = out.Sij[i][j] - metric_vars.gamma[i][j] * V_of_phi;
-    }
+    FOR2(i, j){ out.Sij[i][j] += -metric_vars.gamma[i][j] * V_of_phi; }
 
     return out;
 }
