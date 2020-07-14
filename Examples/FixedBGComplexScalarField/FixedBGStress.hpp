@@ -92,7 +92,12 @@ template <class matter_t, class background_t> class FixedBGStress
 	data_t Stress = 0.0;
 	FOR1(i)
 	{
-	  Stress += si[i]*emtensor.Sij[0][i];
+          Stress += - metric_vars.lapse * si[i]*emtensor.Sij[i][0];
+          FOR1(j)
+          {
+            Stress += metric_vars.gamma[i][j] * metric_vars.shift[j]
+              * si[i] * emtensor.Si[0];
+          }
 	}
 	
 	const auto dArea = area_element_sphere(gamma_spher, x, y, z);
