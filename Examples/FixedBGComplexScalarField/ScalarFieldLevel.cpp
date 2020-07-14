@@ -29,6 +29,7 @@
 
 //#include "WeylExtraction2.hpp"
 #include "StressExtraction.hpp"
+#include "CustomExtraction.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
 void ScalarFieldLevel::specificAdvance()
@@ -59,7 +60,6 @@ void ScalarFieldLevel::initialData()
                               m_restart_time, SmallDataIO::APPEND, true);
     std::vector<std::string> header_strings = {"rho","Xmom"};
     integral_file.write_header_line(header_strings);
-
 }
 
 void ScalarFieldLevel::specificPostTimeStep()
@@ -67,30 +67,17 @@ void ScalarFieldLevel::specificPostTimeStep()
   CH_TIME("ScalarFieldLevel::specificPostTimeStep");
   if (m_p.activate_extraction == 1)
     {
-      // At any level, but after the coarsest timestep
-      int n = 3;
-      double coarsest_dt = m_p.coarsest_dx * m_p.dt_multiplier / pow(2.0, n);
-      const double remainder = fmod(m_time, coarsest_dt);
-      if (min(abs(remainder), abs(remainder - coarsest_dt)) < 1.0e-8)
-	{
-	  // Populate the Stress values on the grid
-	  fillAllGhosts();
-	  ComplexPotential potential(m_p.scalar_mass);
-	  ScalarFieldWithPotential scalar_field(potential);
-	  BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-	  BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, 
+      // Populate the Stress values on the grid
+      fillAllGhosts();
+      ComplexPotential potential(m_p.scalar_mass);
+      ScalarFieldWithPotential scalar_field(potential);
+      BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+      BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, 
 		     BoostedBHFixedBG>(scalar_field, boosted_bh, m_dx, m_p.center),
                      m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
       
-	  // excise within horizon
-	  //      BoxLoops::loop(ExcisionSF<ScalarFieldWithPotential, 
-	  //	     BoostedBHFixedBG>(m_dx, m_p.center, boosted_bh, true),
-	  //	     m_state_new, m_state_new, SKIP_GHOST_CELLS,
-	  //	     disable_simd());
-	}
-
       // write out the integral after each coarse timestep
-      if (m_level == n)
+      if (m_level == 0)
 	{
 	  // integrate the densities and write to a file
 	  double rho_sum = m_gr_amr.compute_sum(c_rho, m_p.coarsest_dx);
@@ -108,6 +95,13 @@ void ScalarFieldLevel::specificPostTimeStep()
 	  m_gr_amr.m_interpolator->refresh();
 	  StressExtraction my_extraction(m_p.extraction_params, m_dt, m_time, m_restart_time);
 	  my_extraction.execute_query(m_gr_amr.m_interpolator);
+
+	  m_gr_amr.m_interpolator->refresh();
+	  int num_points = 200;
+	  CustomExtraction my_extraction_phi(c_phi_Re, num_points, m_p.L, m_p.center,
+					 m_dt, m_time);
+	  my_extraction_phi.execute_query(m_gr_amr.m_interpolator,
+					  m_p.extraction_filename);
 	} 
     }
 }
