@@ -17,8 +17,8 @@
 #include "FixedBGStress.hpp"
 
 // For tag cells
-//#include "ExtractionFixedGridsTaggingCriterion.hpp"
-#include "FixedGridsTaggingCriterion.hpp"
+#include "ExtractionFixedGridsTaggingCriterion.hpp"
+//#include "FixedGridsTaggingCriterion.hpp"
 
 // Problem specific includes
 #include "ComputePack.hpp"
@@ -80,29 +80,39 @@ void ScalarFieldLevel::specificPostTimeStep()
       if (m_level == 0)
 	{
 	  // integrate the densities and write to a file
-	  double rho_sum = m_gr_amr.compute_sum(c_rho, m_p.coarsest_dx);
-	  double Xmom_sum = m_gr_amr.compute_sum(c_Xmom*c_dArea, m_p.coarsest_dx);
+	  double Source_sum = m_gr_amr.compute_sum(c_Source, m_p.coarsest_dx);
+	  double Xmom_sum = m_gr_amr.compute_sum(c_Xmom, m_p.coarsest_dx);
 	  
 	  SmallDataIO integral_file(m_p.integral_filename, m_dt, m_time,
 				    m_restart_time, SmallDataIO::APPEND, false);
 	  // remove any duplicate data if this is post restart
 	  integral_file.remove_duplicate_time_data();
-	  std::vector<double> data_for_writing = {rho_sum, Xmom_sum};
+	  std::vector<double> data_for_writing = {Source_sum, Xmom_sum};
 	  // write data
 	  integral_file.write_time_data_line(data_for_writing);
-	  
+	}
+      if (m_level == m_p.extraction_params.min_extraction_level)
+        {	  
 	  // Now refresh the interpolator and do the interpolation
 	  m_gr_amr.m_interpolator->refresh();
 	  StressExtraction my_extraction(m_p.extraction_params, m_dt, m_time, m_restart_time);
 	  my_extraction.execute_query(m_gr_amr.m_interpolator);
-
-	  m_gr_amr.m_interpolator->refresh();
-	  int num_points = 200;
-	  CustomExtraction my_extraction_phi(c_phi_Re, num_points, m_p.L, m_p.center,
-					 m_dt, m_time);
-	  my_extraction_phi.execute_query(m_gr_amr.m_interpolator,
-					  m_p.extraction_filename);
 	} 
+      if (m_level == 2)
+	{
+	  m_gr_amr.m_interpolator->refresh();
+          int num_points = 200;
+          CustomExtraction my_extraction_phi(c_phi_Re, num_points, m_p.L, m_p.center,
+					     m_dt, m_time);
+          my_extraction_phi.execute_query(m_gr_amr.m_interpolator,
+                                          m_p.extraction_filename);
+
+          m_gr_amr.m_interpolator->refresh();
+          CustomExtraction my_extraction_rho(c_rho, num_points, m_p.L, m_p.center,
+                                             m_dt, m_time);
+          my_extraction_rho.execute_query(m_gr_amr.m_interpolator,
+                                          m_p.extraction_filename2);
+	}
     }
 }
 // Things to do before a plot level - need to calculate the Stress
@@ -151,7 +161,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_chi, c_Xmom, c_Stress, c_dArea};
+  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_Xmom, c_Stress};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep
@@ -159,8 +169,8 @@ void ScalarFieldLevel::specificWritePlotHeader(
 void ScalarFieldLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                                const FArrayBox &current_state)
 {
-  //  BoxLoops::loop(ExtractionFixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center,  m_p.extraction_params),
-  //                 current_state, tagging_criterion, disable_simd());
-  BoxLoops::loop(FixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center),
-  		 current_state, tagging_criterion, disable_simd());
+  BoxLoops::loop(ExtractionFixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center,  m_p.extraction_params),
+		 current_state, tagging_criterion, disable_simd());
+  //BoxLoops::loop(FixedGridsTaggingCriterion(m_dx, m_level, m_p.L, m_p.center),
+  //		 current_state, tagging_criterion, disable_simd());
 }

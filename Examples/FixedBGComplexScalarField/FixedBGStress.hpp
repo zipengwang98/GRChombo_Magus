@@ -72,51 +72,65 @@ template <class matter_t, class background_t> class FixedBGStress
         const double z = coords.z;
         const data_t R = coords.get_radius();
 	const auto gamma_spher = cartesian_to_spherical_LL(metric_vars.gamma, x, y, z);
-
-	Tensor<1, data_t> si;
-	si[0] = x/R;
-	si[1] = y/R;
-	si[2] = z/R;
+	const data_t det_gamma_spher = compute_determinant_sym(gamma_spher);
 	
-	data_t si_norm = 0.0;
-	FOR2(j, k)
-	  {
-	    si_norm += si[j]*si[k]*metric_vars.gamma[j][k];
-	  }
+        // the unit vector in the radial direction
+	Tensor<1, data_t> si_L;
+	si_L[0] = x/R;
+	si_L[1] = y/R;
+	si_L[2] = z/R;
 
-	FOR1(i)
+	data_t si_norm = 0.0;
+	FOR2(i, j)
 	{
-	  si[i] = si[i]/sqrt(si_norm);
+	  si_norm += si_L[i] * si_L[j] * (gamma_UU[i][j] - shift[i]*shift[j]/lapse/lapse);
+	  //	  pout()<<"si_norm = "<<si_norm<<endl;
 	}
+	//	pout()<<"si_norm = "<<si_norm<<endl; 
+
+	FOR1(i)	{ si_L[i] = si_L[i]/sqrt(si_norm);}
 
 	data_t Stress = 0.0;
 	FOR1(i)
 	{
-          Stress += - metric_vars.lapse * si[i]*emtensor.Sij[i][0];
-          FOR1(j)
-          {
-            Stress += metric_vars.gamma[i][j] * metric_vars.shift[j]
-              * si[i] * emtensor.Si[0];
-          }
+          Stress += -shift[i] * si_L[i] * emtensor.Si[0];
+	  FOR1(j)
+	  {
+	    Stress += lapse * si_L[i] * gamma_UU[i][j] * emtensor.Sij[j][0];
+	    pout()<<"Stress = "<<Stress<<endl;
+	  }
 	}
 	
-	const auto dArea = area_element_sphere(gamma_spher, x, y, z);
-	data_t rho2 = simd_max(coords.x * coords.x + coords.y * coords.y, 1e-12);
-	data_t r2sintheta = sqrt(rho2) * R;
+	const auto dArea = area_element_sphere(gamma_spher);
 	
-	data_t Stress2 = Stress * dArea / r2sintheta; 
-	//pout()<< "si[0]" << si[0] << endl;
-	//pout()<< "si[1]" << si[1] << endl;
-	//pout()<< "si[2]" << si[2] << endl;
-	//pout()<< "Sij[0][0]" << emtensor.Sij[0][0] <<endl;
-	//pout()<< "Sij[1][0]" << emtensor.Sij[1][0] <<endl;
-	//pout()<< "Sij[0][1]" << emtensor.Sij[0][1] <<endl;
-	//pout()<< "Sij[2][0]" << emtensor.Sij[2][0] <<endl;
-	//pout()<< "Sij[0][2]" << emtensor.Sij[0][2] <<endl;
-	//pout()<< "Stress" << Stress << endl;
-	//pout()<< "dArea" << dArea << endl;
+	data_t Xmom = -emtensor.Si[0] * sqrt(det_gamma);
+
+	data_t Source = -emtensor.rho * metric_vars.d1_lapse[0];
+	FOR1(i)
+	{
+	  Source += emtensor.Si[i] * metric_vars.d1_shift[i][0];
+	  FOR2(j,k)
+	    {
+	      Source += metric_vars.lapse * gamma_UU[i][k]*emtensor.Sij[k][j] *
+	  	chris_phys.ULL[j][i][0];
+	    }
+	}
+	
+	Source = Source * sqrt(det_gamma);
+
+	auto cut = simd_compare_gt(R, 500.);
+	auto R_cut = simd_conditional(cut, 0.0, R);
+	//pout()<<"Source = "<<Source<<endl;
+	//pout()<<"R_cut = "<<R_cut<<endl;
+	//pout()<<"x = "<<x<<endl;
+	//pout()<<"y = "<<y<<endl;
+	//pout()<<"z = "<<z<<endl;
+	Source = simd_conditional(cut, 0.0, Source);
+        Xmom = simd_conditional(cut, 0.0, Xmom);
+
 	current_cell.store_vars(emtensor.rho, c_rho);
-	current_cell.store_vars(emtensor.Si[0], c_Xmom);
+	current_cell.store_vars(Source, c_Source);
+	current_cell.store_vars(Xmom, c_Xmom);
         current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);
     }

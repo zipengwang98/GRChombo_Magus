@@ -36,7 +36,7 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
       {
         out.Sij[i][j] =
             -0.5 * metric_vars.gamma[i][j] * Vt + d1.phi_Re[i] * d1.phi_Re[j] -
-       	     0.5 * metric_vars.gamma[i][j] * Vt + d1.phi_Im[i] * d1.phi_Im[j];
+             0.5 * metric_vars.gamma[i][j] * Vt + d1.phi_Im[i] * d1.phi_Im[j];
       }
 
     // S = Tr_S_ij
@@ -45,7 +45,7 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     // S_i (note lower index) = - n^a T_ai
     FOR1(i)
     {
-        out.Si[i] = -d1.phi_Re[i] * vars.Pi_Re - d1.phi_Im[i] * vars.Pi_Im;
+	out.Si[i] = -d1.phi_Re[i] * vars.Pi_Re - d1.phi_Im[i] * vars.Pi_Im;
     }
 
     // rho = n^a n^b T_ab

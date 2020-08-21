@@ -31,6 +31,7 @@ public:
 	//pp.load("scalar_center", initial_params.center, center);
 	pp.load("integral_filename", integral_filename);
 	pp.load("extraction_filename", extraction_filename);
+	pp.load("extraction_filename2", extraction_filename2);
 
         // Background boosted bh data
         pp.load("bh_mass", bg_params.mass);
@@ -43,7 +44,7 @@ public:
     // Initial data for matter, metric and potential
     int activate_extraction;
     double scalar_mass, scalar_amplitude;
-  std::string integral_filename, extraction_filename;
+  std::string integral_filename, extraction_filename, extraction_filename2;
     BoostedBHFixedBG::params_t bg_params;
   //    ScalarConstant::params_t initial_params;
   //    ComplexPotential::params_t potential_params;

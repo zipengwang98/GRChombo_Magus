@@ -23,6 +23,7 @@ inline void CustomExtraction::execute_query(
   std::vector<double> interp_x(m_num_points);
   std::vector<double> interp_y(m_num_points);
   std::vector<double> interp_z(m_num_points);
+  std::vector<double> write_x(m_num_points);
 
   // Work out the coordinates
   // go out radially, focussed near centre, out to L/2
@@ -37,6 +38,9 @@ inline void CustomExtraction::execute_query(
         interp_z[idx] =
             m_center[2] + 1.0 +
 	  pow(double(idx) / double(m_num_points), 3.0) * 0.5 * m_L;
+	write_x[idx] =
+	    1.0 +
+          pow(double(idx) / double(m_num_points), 3.0) * 0.5 * m_L;
     }
 
   // set up the query
@@ -50,7 +54,7 @@ inline void CustomExtraction::execute_query(
   a_interpolator->interp(query);
 
   // This generates the output
-  write_extraction(a_filename, interp_x, interp_y, interp_z, interp_var_data);
+  write_extraction(a_filename, write_x, interp_y, interp_z, interp_var_data);
 }
 
 //! Write out the result of the extraction in phi and theta at each timestep for

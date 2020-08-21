@@ -15,6 +15,7 @@ enum
     c_Pi_Im,
     c_chi,
     c_rho,
+    c_Source,
     c_Xmom,
     c_Stress,
     c_dArea,
@@ -25,7 +26,7 @@ enum
 namespace UserVariables
 {
   static constexpr char const *variable_names[NUM_VARS] = {"phi_Re", "phi_Im", "Pi_Re", "Pi_Im", "chi",
-							   "rho", "Xmom", "Stress", "dArea"};
+							   "rho", "Source", "Xmom", "Stress", "dArea"};
 }
 
 #endif /* USERVARIABLES_HPP */
