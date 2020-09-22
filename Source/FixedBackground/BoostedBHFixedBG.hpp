@@ -75,10 +75,10 @@ class BoostedBHFixedBG
     {
         // black hole params - mass M and boost v
         // "boost" is the gamma factor for the boost
-        const double M = m_params.mass;
+      //        const double M = m_params.mass;
         const double v = m_params.velocity;
         const double boost = pow(1 - v * v, -0.5);
-
+	const double M = m_params.mass / boost;
         // work out where we are on the grid including effect of boost
         // on x direction (length contraction)
         const data_t x = coords.x;
@@ -95,6 +95,7 @@ class BoostedBHFixedBG
         const data_t H = M / r;
         const Tensor<1, data_t> el = {boost * (x_p / r - v), y / r, z / r};
         const data_t el_t = boost * (1.0 - v * x_p / r);
+	//pout()<<"M_BH_1 = "<<M<<endl;
 
         // Calculate the gradients in el and H
         Tensor<1, data_t> dHdx;
@@ -183,9 +184,10 @@ class BoostedBHFixedBG
                        const Coordinates<data_t> &coords) const
     {
         // black hole params - mass M and boost v
-        const double M = m_params.mass;
+      //        const double M = m_params.mass;
         const double v = m_params.velocity;
         const double boost = pow(1 - v * v, -0.5);
+	const double M = m_params.mass / boost;
 
         // work out where we are on the grid including effect of boost
         // on x direction (length contraction)
@@ -205,8 +207,10 @@ class BoostedBHFixedBG
         Tensor<1, data_t> drdx;
         FOR1(i) { drdx[i] = x[i] / r; }
         drdx[0] *= boost * boost;
-
-        FOR1(i) { dHdx[i] = -H / r * drdx[i]; }
+	
+	//pout()<<"M_BH_2 = "<<M<<endl;
+        
+	FOR1(i) { dHdx[i] = -H / r * drdx[i]; }
 
         // note to use convention as in rest of tensors the last index is the
         // derivative index so these are d_j l_i
@@ -234,22 +238,22 @@ class BoostedBHFixedBG
     {
         // black hole params - mass M and boost v
         // "boost" is the gamma factor for the boost
-        const double M = m_params.mass;
+        //const double M = m_params.mass;
         const double boost =
             pow(1.0 - m_params.velocity * m_params.velocity, -0.5);
-
+	const double M = m_params.mass / boost;
         // work out where we are on the grid including effect of boost
         // on x direction (length contraction)
         const double x_p = coords.x * boost;
         const double y = coords.y;
         const double z = coords.z;
-
+	
         // the coordinate radius (boosted)
         const double r2 = x_p * x_p + y * y + z * z;
 
         // compare this to horizon in kerr schild coords
         const double r_horizon = 2.0 * M;
-
+	//	pout()<<"M_BH_3 = "<<M<<endl;
         return sqrt(r2) / r_horizon;
     }
 };

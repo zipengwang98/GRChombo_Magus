@@ -58,7 +58,7 @@ void ScalarFieldLevel::initialData()
     //setup the output file
     SmallDataIO integral_file(m_p.integral_filename, m_dt, m_time,
                               m_restart_time, SmallDataIO::APPEND, true);
-    std::vector<std::string> header_strings = {"rho","Xmom"};
+    std::vector<std::string> header_strings = {"Source","Xmom"};
     integral_file.write_header_line(header_strings);
 }
 
@@ -90,16 +90,16 @@ void ScalarFieldLevel::specificPostTimeStep()
 	  std::vector<double> data_for_writing = {Source_sum, Xmom_sum};
 	  // write data
 	  integral_file.write_time_data_line(data_for_writing);
-	}
-      if (m_level == m_p.extraction_params.min_extraction_level)
-        {	  
+	  //	}
+	  //if (m_level == m_p.extraction_params.min_extraction_level)
+	  //{	  
 	  // Now refresh the interpolator and do the interpolation
 	  m_gr_amr.m_interpolator->refresh();
 	  StressExtraction my_extraction(m_p.extraction_params, m_dt, m_time, m_restart_time);
 	  my_extraction.execute_query(m_gr_amr.m_interpolator);
-	} 
-      if (m_level == 2)
-	{
+	  //} 
+	  //if (m_level == 2)
+	  //{
 	  m_gr_amr.m_interpolator->refresh();
           int num_points = 200;
           CustomExtraction my_extraction_phi(c_phi_Re, num_points, m_p.L, m_p.center,
