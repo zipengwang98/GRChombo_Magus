@@ -29,6 +29,7 @@
 
 //#include "WeylExtraction2.hpp"
 #include "StressExtraction.hpp"
+#include "StressExtraction_halves.hpp"
 #include "CustomExtraction.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
@@ -97,6 +98,10 @@ void ScalarFieldLevel::specificPostTimeStep()
 	  m_gr_amr.m_interpolator->refresh();
 	  StressExtraction my_extraction(m_p.extraction_params, m_dt, m_time, m_restart_time);
 	  my_extraction.execute_query(m_gr_amr.m_interpolator);
+
+          m_gr_amr.m_interpolator->refresh();
+          StressExtraction_halves my_extraction_halves(m_p.extraction_params, m_dt, m_time, m_restart_time);
+          my_extraction_halves.execute_query(m_gr_amr.m_interpolator);
 	  //} 
 	  //if (m_level == 2)
 	  //{
@@ -161,7 +166,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_Xmom, c_Stress};
+  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_Xmom, c_Stress, c_dArea};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep

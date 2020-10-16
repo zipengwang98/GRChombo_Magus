@@ -133,8 +133,8 @@ template <class matter_t, class background_t> class FixedBGStress
 	
 	Source = Source * sqrt(det_gamma);
 
-	auto cut = simd_compare_gt(R, 400.);
-	auto cut2 = simd_compare_lt(R, 5.);
+	auto cut = simd_compare_gt(R, 1000.);
+	auto cut2 = simd_compare_lt(R, 10.);
 
 	Source = simd_conditional(cut, 0.0, Source);
         Xmom = simd_conditional(cut, 0.0, Xmom);
