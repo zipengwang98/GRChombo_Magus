@@ -75,10 +75,10 @@ class BoostedBHFixedBG
     {
         // black hole params - mass M and boost v
         // "boost" is the gamma factor for the boost
-      //        const double M = m_params.mass;
+        const double M = m_params.mass;
         const double v = m_params.velocity;
         const double boost = pow(1 - v * v, -0.5);
-	const double M = m_params.mass / boost;
+	//const double M = m_params.mass / boost;
         // work out where we are on the grid including effect of boost
         // on x direction (length contraction)
         const data_t x = coords.x;
@@ -184,10 +184,10 @@ class BoostedBHFixedBG
                        const Coordinates<data_t> &coords) const
     {
         // black hole params - mass M and boost v
-      //        const double M = m_params.mass;
+        const double M = m_params.mass;
         const double v = m_params.velocity;
         const double boost = pow(1 - v * v, -0.5);
-	const double M = m_params.mass / boost;
+	//const double M = m_params.mass / boost;
 
         // work out where we are on the grid including effect of boost
         // on x direction (length contraction)
@@ -238,10 +238,10 @@ class BoostedBHFixedBG
     {
         // black hole params - mass M and boost v
         // "boost" is the gamma factor for the boost
-        //const double M = m_params.mass;
+        const double M = m_params.mass;
         const double boost =
             pow(1.0 - m_params.velocity * m_params.velocity, -0.5);
-	const double M = m_params.mass / boost;
+	//const double M = m_params.mass / boost;
         // work out where we are on the grid including effect of boost
         // on x direction (length contraction)
         const double x_p = coords.x * boost;

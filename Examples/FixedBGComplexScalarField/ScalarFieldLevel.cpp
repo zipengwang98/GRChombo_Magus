@@ -54,7 +54,7 @@ void ScalarFieldLevel::initialData()
     ScalarConstant initial_sf(m_p.scalar_amplitude, m_p.scalar_mass, m_p.center,
 			      m_p.bg_params, m_dx);
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boosted_bh, initial_sf),
-                   m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
+		   m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
     
     //setup the output file
     SmallDataIO integral_file(m_p.integral_filename, m_dt, m_time,
@@ -105,18 +105,18 @@ void ScalarFieldLevel::specificPostTimeStep()
 	  //} 
 	  //if (m_level == 2)
 	  //{
-	  m_gr_amr.m_interpolator->refresh();
-          int num_points = 200;
-          CustomExtraction my_extraction_phi(c_phi_Re, num_points, m_p.L, m_p.center,
-					     m_dt, m_time);
-          my_extraction_phi.execute_query(m_gr_amr.m_interpolator,
-                                          m_p.extraction_filename);
+	  //	  m_gr_amr.m_interpolator->refresh();
+          //int num_points = 200;
+          //CustomExtraction my_extraction_phi(c_phi_Re, num_points, m_p.L, m_p.center,
+	  //				     m_dt, m_time);
+          //my_extraction_phi.execute_query(m_gr_amr.m_interpolator,
+           //                               m_p.extraction_filename);
 
-          m_gr_amr.m_interpolator->refresh();
-          CustomExtraction my_extraction_rho(c_rho, num_points, m_p.L, m_p.center,
-                                             m_dt, m_time);
-          my_extraction_rho.execute_query(m_gr_amr.m_interpolator,
-                                          m_p.extraction_filename2);
+          //m_gr_amr.m_interpolator->refresh();
+          //CustomExtraction my_extraction_rho(c_rho, num_points, m_p.L, m_p.center,
+          //                                   m_dt, m_time);
+          //my_extraction_rho.execute_query(m_gr_amr.m_interpolator,
+          //                                m_p.extraction_filename2);
 	}
     }
 }
@@ -166,7 +166,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_Xmom, c_Stress, c_dArea};
+  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_S1, c_S2, c_S3, c_d1lapse, c_sqdetgamma, c_Xmom, c_Stress, c_dArea};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep
