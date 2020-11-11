@@ -122,25 +122,32 @@ template <class matter_t, class background_t> class FixedBGStress
 	    }
 	}
 
-	//Source = Source * 
-	const auto sqdetgamma = sqrt(det_gamma);
+	S1 = S1 * sqrt(det_gamma);
+	S2 = S2 * sqrt(det_gamma);
+	S3 = S3 * sqrt(det_gamma);
+	Source = Source * sqrt(det_gamma);
+	data_t rho = emtensor.rho;
+	auto cuto = simd_compare_gt(R, 1000.);
+	auto cuti = simd_compare_lt(R, 5.);
 
-	//	auto cut = simd_compare_gt(R, 1000.);
-	//auto cut2 = simd_compare_lt(R, 10.);
+	rho = simd_conditional(cuto, 0.0, rho);
+	rho = simd_conditional(cuti, 0.0, rho);
+	Source = simd_conditional(cuto, 0.0, Source);
+	Source = simd_conditional(cuti, 0.0, Source);
+	S1 = simd_conditional(cuto, 0.0, S1);
+        S1 = simd_conditional(cuti, 0.0, S1);
+	S2 = simd_conditional(cuto, 0.0, S2);
+        S2 = simd_conditional(cuti, 0.0, S2);
+	S3 = simd_conditional(cuto, 0.0, S3);
+        S3 = simd_conditional(cuti, 0.0, S3);
+        Xmom = simd_conditional(cuto, 0.0, Xmom);
+	Xmom = simd_conditional(cuti, 0.0, Xmom);
 
-	//Source = simd_conditional(cut, 0.0, Source);
-        //Xmom = simd_conditional(cut, 0.0, Xmom);
-	//Source = simd_conditional(cut2, 0.0, Source);
-	//Xmom = simd_conditional(cut2, 0.0, Xmom);
-	//	Stress = simd_conditional(cut2, 0.0, Stress);
-
-	current_cell.store_vars(emtensor.rho, c_rho);
+	current_cell.store_vars(rho, c_rho);
 	current_cell.store_vars(Source, c_Source);
 	current_cell.store_vars(S1, c_S1);
 	current_cell.store_vars(S2, c_S2);
 	current_cell.store_vars(S3, c_S3);
-	current_cell.store_vars(metric_vars.d1_lapse[0], c_d1lapse);
-	current_cell.store_vars(sqdetgamma, c_sqdetgamma);
 	current_cell.store_vars(Xmom, c_Xmom);
         current_cell.store_vars(Stress, c_Stress);
 	current_cell.store_vars(dArea, c_dArea);

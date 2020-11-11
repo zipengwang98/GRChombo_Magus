@@ -166,7 +166,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_S1, c_S2, c_S3, c_d1lapse, c_sqdetgamma, c_Xmom, c_Stress, c_dArea};
+  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_S1, c_S2, c_S3, c_Xmom, c_Stress, c_dArea};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep
