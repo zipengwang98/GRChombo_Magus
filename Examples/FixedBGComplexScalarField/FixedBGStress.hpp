@@ -127,8 +127,8 @@ template <class matter_t, class background_t> class FixedBGStress
 	S3 = S3 * sqrt(det_gamma);
 	Source = Source * sqrt(det_gamma);
 	data_t rho = emtensor.rho;
-	auto cuto = simd_compare_gt(R, 1000.);
-	auto cuti = simd_compare_lt(R, 5.);
+	auto cuto = simd_compare_gt(R, 200.);
+	auto cuti = simd_compare_lt(R, 3.);
 
 	rho = simd_conditional(cuto, 0.0, rho);
 	rho = simd_conditional(cuti, 0.0, rho);
@@ -143,6 +143,7 @@ template <class matter_t, class background_t> class FixedBGStress
         Xmom = simd_conditional(cuto, 0.0, Xmom);
 	Xmom = simd_conditional(cuti, 0.0, Xmom);
 
+	current_cell.store_vars(emtensor.rho, c_rhofull);
 	current_cell.store_vars(rho, c_rho);
 	current_cell.store_vars(Source, c_Source);
 	current_cell.store_vars(S1, c_S1);

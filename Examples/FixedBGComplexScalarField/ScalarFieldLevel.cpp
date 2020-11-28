@@ -9,7 +9,8 @@
 #include "NanCheck.hpp"
 
 // For RHS update
-#include "BoostedBHFixedBG.hpp"
+//#include "BoostedBHFixedBG.hpp"
+#include "BoostedIsotropicBHFixedBG.hpp"
 #include "Excision.hpp"
 #include "FixedBGEvolution.hpp"
 
@@ -50,7 +51,7 @@ void ScalarFieldLevel::initialData()
 
     // First set everything to zero ... we don't want undefined values in
     // constraints etc, then initial conditions for scalar field
-    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+    BoostedIsotropicBHFixedBG boosted_bh(m_p.bg_params, m_dx);
     ScalarConstant initial_sf(m_p.scalar_amplitude, m_p.scalar_mass, m_p.center,
 			      m_p.bg_params, m_dx);
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boosted_bh, initial_sf),
@@ -72,9 +73,9 @@ void ScalarFieldLevel::specificPostTimeStep()
       fillAllGhosts();
       ComplexPotential potential(m_p.scalar_mass);
       ScalarFieldWithPotential scalar_field(potential);
-      BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+      BoostedIsotropicBHFixedBG boosted_bh(m_p.bg_params, m_dx);
       BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, 
-		     BoostedBHFixedBG>(scalar_field, boosted_bh, m_dx, m_p.center),
+		     BoostedIsotropicBHFixedBG>(scalar_field, boosted_bh, m_dx, m_p.center),
                      m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
       
       // write out the integral after each coarse timestep
@@ -149,15 +150,15 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     // RHS for non evolution vars is zero, to prevent undefined values
     ComplexPotential potential(m_p.scalar_mass);
     ScalarFieldWithPotential scalar_field(potential);
-    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-    FixedBGEvolution<ScalarFieldWithPotential, BoostedBHFixedBG> my_evolution(
+    BoostedIsotropicBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+    FixedBGEvolution<ScalarFieldWithPotential, BoostedIsotropicBHFixedBG> my_evolution(
         scalar_field, boosted_bh, m_p.sigma, m_dx, m_p.center);
     SetValue set_static_rhs_zero(0.0, Interval(c_chi,c_dArea));
     auto compute_pack = make_compute_pack(my_evolution, set_static_rhs_zero);
     BoxLoops::loop(compute_pack, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 
     // Do excision within horizon
-    BoxLoops::loop(Excision<ScalarFieldWithPotential, BoostedBHFixedBG>(
+    BoxLoops::loop(Excision<ScalarFieldWithPotential, BoostedIsotropicBHFixedBG>(
                        m_dx, m_p.center, boosted_bh),
                    a_soln, a_rhs, EXCLUDE_GHOST_CELLS, disable_simd());
 }
@@ -166,7 +167,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_S1, c_S2, c_S3, c_Xmom, c_Stress, c_dArea};
+  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_rhofull, c_Source, c_S1, c_S2, c_S3, c_Xmom, c_Stress, c_dArea};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep

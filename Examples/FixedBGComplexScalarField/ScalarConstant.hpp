@@ -10,7 +10,7 @@
 #include "Cell.hpp"
 #include "Coordinates.hpp"
 #include "FixedBGComplexScalarField.hpp"
-#include "BoostedBHFixedBG.hpp"
+#include "BoostedIsotropicBHFixedBG.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total no. components
 #include "VarsTools.hpp"
@@ -27,13 +27,13 @@ protected:
   const double m_amplitude;
   const double m_mu;
   const std::array<double, CH_SPACEDIM> m_center;
-  const BoostedBHFixedBG::params_t m_bg_params;
+  const BoostedIsotropicBHFixedBG::params_t m_bg_params;
 
 public:
   //! The constructor for the class
   ScalarConstant(const double a_amplitude, const double a_mu,
 		    const std::array<double, CH_SPACEDIM> a_center,
-		    const BoostedBHFixedBG::params_t a_bg_params,
+		    const BoostedIsotropicBHFixedBG::params_t a_bg_params,
          	    const double a_dx)
     : m_amplitude(a_amplitude), m_mu(a_mu), m_center(a_center),
       m_bg_params(a_bg_params), m_dx(a_dx)
@@ -49,7 +49,7 @@ public:
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
 
         // get the metric vars
-	BoostedBHFixedBG boosted_bh(m_bg_params, m_dx);
+	BoostedIsotropicBHFixedBG boosted_bh(m_bg_params, m_dx);
         MetricVars<data_t> metric_vars;
         boosted_bh.compute_metric_background(metric_vars, coords); 
 

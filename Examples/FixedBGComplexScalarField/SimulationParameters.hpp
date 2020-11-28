@@ -11,7 +11,7 @@
 #include "FixedBGSimulationParametersBase.hpp"
 
 // Problem specific includes:
-#include "BoostedBHFixedBG.hpp"
+#include "BoostedIsotropicBHFixedBG.hpp"
 #include "ComplexPotential.hpp"
 #include "ScalarConstant.hpp"
 
@@ -45,7 +45,7 @@ public:
     int activate_extraction;
     double scalar_mass, scalar_amplitude;
   std::string integral_filename; //extraction_filename, extraction_filename2;
-    BoostedBHFixedBG::params_t bg_params;
+    BoostedIsotropicBHFixedBG::params_t bg_params;
   //    ScalarConstant::params_t initial_params;
   //    ComplexPotential::params_t potential_params;
 };
