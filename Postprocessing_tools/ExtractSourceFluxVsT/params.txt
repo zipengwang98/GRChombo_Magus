@@ -1,0 +1,96 @@
+#Params for runtime inputs
+
+verbosity = 0
+integral_filename = SourceXmomIntegral
+
+#chk_prefix = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v0475/boost0475_chk_
+#plot_prefix = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v0475/boost0475_plt_
+#restart_file = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v03/boost03_chk_001000.3d.hdf5
+
+# For read in of files
+chk_prefix = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v0475/boost0475_plt_
+restart_file = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v0475/boost0475_plt_000000.3d.hdf5
+checkpoint_interval = 5
+start_file = 1
+num_files = 644
+
+# For desired outputs, set plot interval to zero to turn off plot outputs
+plot_interval = 0
+plot_prefix = PlotFile
+
+# Set up grid spacings and regrid params
+# NB - the N values need to be multiples of block_factor
+N1 = 128
+N2 = 64
+N3 = 64
+
+# Length of longest box side, dx_coarsest = L/N(max)
+# NB if non cubic, this determines dx for all sides
+L =  2048
+center = 1024.0 0.0 0.0 #L/2 0 0 
+
+# Level data
+# Maximum number of times you can regrid above coarsest level
+max_level =7 # There are (max_level+1) grids, so min is zero
+# Frequency of regridding at each level
+# Need one for each level, ie max_level+1 items (or more)
+# No regrid for fixed BG and no tag buffer
+regrid_interval = 0 0 0 0 0 0 0 0 0 0
+tag_buffer_size = 0
+# Max and min box size - for load balancing
+max_box_size = 16
+min_box_size = 16
+write_plot_ghosts = 0
+
+#boundaries and periodicity of grid
+#Periodic directions - 0 = false, 1 = true
+isPeriodic = 0 0 0
+# if not periodic, then specify the boundary type
+# 0 = static, 1 = sommerfeld, 2 = reflective
+# (see BoundaryConditions.hpp for details)
+hi_boundary = 3 3 3
+lo_boundary = 3 2 2
+
+# if sommerfeld boundaries selected, must select 
+# asymptotic values (in order given by UserVariables.hpp)
+# 0 = even
+# 1,2,3 = odd x, y, z
+# 4,5,6 = odd xy, yz, xz
+vars_parity = 0 0 0 0           #phi, Pi
+              0 0 0 0 0 0 0       #chi, rho, Source, S1, S2, S3
+              0 0 0             #Xmom, Stress, dArea
+
+# if reflective boundaries selected, must set
+# parity of all vars (in order given by UserVariables.hpp)
+vars_asymptotic_values = 0 0 0 0           #phi, Pi
+                         1 0 0 0 0 0 0       #chi, rho, Source, S1, S2, S3
+                         0 0 0             #Xmom, Stress, dArea
+
+# specify non zero asympotitic vars
+#num_nonzero_asymptotic_vars = 1
+#nonzero_asymptotic_vars = chi
+#nonzero_asymptotic_values = 1.0
+
+# SF Initial data
+scalar_amplitude = 0.1
+#scalar_width = 4.0
+scalar_mass = 0.05
+
+# BH initial data
+bh_mass = 1.0
+bh_velocity = 0.475
+
+#extraction params
+#default center to grid center, uncomment to change
+#extraction_center = 2048.0 0.0 0.0
+activate_extraction = 1
+#write_extraction = 1
+num_extraction_radii = 3
+extraction_radii = 3. 200. 400.
+extraction_levels = 0 0 0
+num_points_phi = 36
+num_points_theta = 48
+num_modes = 1
+#modes = 2 0 # l m for spherical harmonics
+#        2 1
+#        2 2
