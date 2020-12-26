@@ -124,17 +124,14 @@ void ScalarFieldLevel::specificPostTimeStep()
 // Things to do before a plot level - need to calculate the Stress
 void ScalarFieldLevel::prePlotLevel()
 {
-  //  fillAllGhosts();
-  //if (m_p.activate_extraction == 1)
-  //  {
-  //    ComplexPotential potential(m_p.scalar_mass);
-  //    ScalarFieldWithPotential scalar_field(potential);
-  //    BoostedBHFixedBG boosted_bh(m_p.bg_params, m_dx);
-  //    BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential, BoostedBHFixedBG>(
-  //	                 scalar_field, boosted_bh, m_dx, m_p.center),
-  //		     m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
-  //}
-}
+  fillAllGhosts();
+  ComplexPotential potential(m_p.scalar_mass);
+  ScalarFieldWithPotential scalar_field(potential);
+  BoostedIsotropicBHFixedBG boosted_bh(m_p.bg_params, m_dx);
+  BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential,
+		 BoostedIsotropicBHFixedBG>(scalar_field, boosted_bh, m_dx, m_p.center),
+		 m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+  }
 
 // Things to do before outputting a checkpoint file
 void ScalarFieldLevel::preCheckpointLevel()
@@ -167,7 +164,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::specificWritePlotHeader(
     std::vector<int> &plot_states) const
 {
-  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_rhofull, c_Source, c_S1, c_S2, c_S3, c_Xmom, c_Stress, c_dArea};
+  plot_states = {c_phi_Re, c_phi_Im, c_rho, c_Source, c_S1, c_S2, c_S3, c_Xmom, c_Stress, c_dArea};
 }
 
 // Note that for the fixed grids this only happens on the initial timestep
