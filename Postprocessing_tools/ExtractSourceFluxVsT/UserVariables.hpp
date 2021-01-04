@@ -12,7 +12,6 @@ enum
     c_phi_Re, // matter field added
     c_phi_Im,
     c_rho,
-    c_rhofull,
     c_Source,
     c_S1,
     c_S2,
@@ -35,7 +34,6 @@ enum
     c_empty8,
     c_empty9,
     c_empty10,
-    c_empty11,
     c_Pi_Re, 
     c_Pi_Im,
     c_chi,
@@ -45,7 +43,7 @@ enum
 namespace UserVariables
 {
   static constexpr char const *variable_names[NUM_VARS] = {"phi_Re", "phi_Im",
-							   "rhofull", "rho", "Source", "S1", "S2", "S3",
+							   "rho", "Source", "S1", "S2", "S3",
 							   "Xmom", "Stress", "dArea"};
 }
 

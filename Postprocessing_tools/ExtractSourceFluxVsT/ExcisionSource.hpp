@@ -44,9 +44,9 @@ template <class matter_t, class background_t> class ExcisionSource
         // as horizon unlikely to be very distorted relative to coords
 	double horizon_distance = m_background.excise(coords);
         double radius = coords.get_radius();
-        if (horizon_distance < 3.0 || radius > 200.0)
+        if (horizon_distance < 3.0 || radius > 900.0)
 	  {
-            current_cell.store_vars(0.0, c_S3);
+            current_cell.store_vars(0.0, c_Source);
 	  }
     }
 };
