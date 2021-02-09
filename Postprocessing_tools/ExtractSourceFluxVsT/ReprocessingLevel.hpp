@@ -52,7 +52,7 @@ class ReprocessingLevel : public GRAMRLevel
 			 m_state_new, m_state_new, SKIP_GHOST_CELLS,
 			 disable_simd());
 
-          if (m_level == 7)
+          if (m_level == 6)
             {
               // integrate the densities and write to a file
               double Source_sum = m_gr_amr.compute_sum(c_Source, m_p.coarsest_dx);

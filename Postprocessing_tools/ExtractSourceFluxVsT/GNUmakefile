@@ -8,7 +8,7 @@
 
 #CHOMBO_HOME:=/home/fmuia/Chombo_Debug/lib 
 ebase := ReprocessingTool
-GRCHOMBO_SOURCE = /home/dc-tray2/GRChombo/Source/
+GRCHOMBO_SOURCE = ../../GRChombo/Source/
 
 LibNames := AMRTimeDependent AMRTools BoxTools
 

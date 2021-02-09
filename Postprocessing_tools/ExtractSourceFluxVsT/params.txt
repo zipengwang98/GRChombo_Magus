@@ -8,11 +8,11 @@ integral_filename = SourceXmomIntegral
 #restart_file = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v03/boost03_chk_001000.3d.hdf5
 
 # For read in of files
-chk_prefix = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v0475/boost0475_plt_
-restart_file = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v0475/boost0475_plt_000000.3d.hdf5
+chk_prefix = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v05/boost05_plt_
+restart_file = /home/dc-tray2/rds/rds-dirac-dp131/dc-tray2/FixedBGRComplex/mu005_v05/boost05_plt_000000.3d.hdf5
 checkpoint_interval = 5
 start_file = 1
-num_files = 644
+num_files = 835
 
 # For desired outputs, set plot interval to zero to turn off plot outputs
 plot_interval = 0
@@ -78,7 +78,7 @@ scalar_mass = 0.05
 
 # BH initial data
 bh_mass = 1.0
-bh_velocity = 0.475
+bh_velocity = 0.5
 
 #extraction params
 #default center to grid center, uncomment to change
