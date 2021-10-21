@@ -83,9 +83,7 @@ template <class matter_t, class background_t> class FixedBGStress
 	FOR2(i, j)
 	{
 	  si_norm += si_L[i] * si_L[j] * (gamma_UU[i][j]);
-	  //	  pout()<<"si_norm = "<<si_norm<<endl;
 	}
-	//	pout()<<"si_norm = "<<si_norm<<endl; 
 
 	FOR1(i)	{ si_L[i] = si_L[i]/sqrt(si_norm);}
 
@@ -96,63 +94,32 @@ template <class matter_t, class background_t> class FixedBGStress
 	  FOR1(j)
 	  {
 	    Stress += lapse * si_L[i] * gamma_UU[i][j] * emtensor.Sij[0][j];
-	    //pout()<<"Stress = "<<Stress<<endl;
 	  }
 	}
 	
 	const auto dArea = area_element_sphere(gamma_spher);
+	Stress = Stress * dArea;
 	
 	data_t Xmom = -emtensor.Si[0] * sqrt(det_gamma);
 
-	data_t S1 = -emtensor.rho * metric_vars.d1_lapse[0];
-	data_t Source = S1;
+	data_t Source = -emtensor.rho * metric_vars.d1_lapse[0];
 
-	data_t S2 = 0;
-	data_t S3 = 0;
 	FOR1(i)
 	{
-	  S2 += emtensor.Si[i] * metric_vars.d1_shift[i][0];
 	  Source += emtensor.Si[i] * metric_vars.d1_shift[i][0];
 	  FOR2(j,k)
 	    {
-	      S3 += lapse * gamma_UU[i][k]*emtensor.Sij[k][j] *
-                chris_phys.ULL[j][i][0];
 	      Source += lapse * gamma_UU[i][k]*emtensor.Sij[k][j] *
                 chris_phys.ULL[j][i][0];
 	    }
 	}
 
-	S1 = S1 * sqrt(det_gamma);
-	S2 = S2 * sqrt(det_gamma);
-	S3 = S3 * sqrt(det_gamma);
 	Source = Source * sqrt(det_gamma);
-	//data_t Source_full = Source;
-	//data_t rho = emtensor.rho;
-	//auto cuto = simd_compare_gt(R, 200.);
-	//auto cuti = simd_compare_lt(R, 3.);
-
-	//rho = simd_conditional(cuto, 0.0, rho);
-	//rho = simd_conditional(cuti, 0.0, rho);
-	//Source = simd_conditional(cuto, 0.0, Source);
-	//Source = simd_conditional(cuti, 0.0, Source);
-	//S1 = simd_conditional(cuto, 0.0, S1);
-        //S1 = simd_conditional(cuti, 0.0, S1);
-	//S2 = simd_conditional(cuto, 0.0, S2);
-        //S2 = simd_conditional(cuti, 0.0, S2);
-	//S3 = simd_conditional(cuto, 0.0, S3);
-        //S3 = simd_conditional(cuti, 0.0, S3);
-        //Xmom = simd_conditional(cuto, 0.0, Xmom);
-	//Xmom = simd_conditional(cuti, 0.0, Xmom);
 
 	current_cell.store_vars(emtensor.rho, c_rho);
-	//current_cell.store_vars(rho, c_rho);
 	current_cell.store_vars(Source, c_Source);
-	current_cell.store_vars(S1, c_S1);
-	current_cell.store_vars(S2, c_S2);
-	current_cell.store_vars(S3, c_S3);
 	current_cell.store_vars(Xmom, c_Xmom);
         current_cell.store_vars(Stress, c_Stress);
-	current_cell.store_vars(dArea, c_dArea);
     }
 };
 
