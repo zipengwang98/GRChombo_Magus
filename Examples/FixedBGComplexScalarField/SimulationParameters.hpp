@@ -28,9 +28,9 @@ public:
         // Initial and SF data
         pp.load("scalar_mass", scalar_mass);
         pp.load("scalar_amplitude", scalar_amplitude);
-	//pp.load("scalar_center", initial_params.center, center);
+	pp.load("lambda_interaction", lambda_interaction);
+
 	pp.load("integral_filename", integral_filename);
-	//	pp.load("extraction_filename", extraction_filename);
 	//pp.load("extraction_filename2", extraction_filename2);
 
         // Background boosted bh data
@@ -43,7 +43,7 @@ public:
 
     // Initial data for matter, metric and potential
     int activate_extraction;
-    double scalar_mass, scalar_amplitude;
+  double scalar_mass, scalar_amplitude, lambda_interaction;
   std::string integral_filename; //extraction_filename, extraction_filename2;
     BoostedIsotropicBHFixedBG::params_t bg_params;
   //    ScalarConstant::params_t initial_params;
