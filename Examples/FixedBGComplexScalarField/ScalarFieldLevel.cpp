@@ -107,7 +107,7 @@ void ScalarFieldLevel::specificPostTimeStep()
 void ScalarFieldLevel::prePlotLevel()
 {
   fillAllGhosts();
-  ComplexPotential potential(m_p.scalar_mass, m_p.lambda_interaction);
+  ComplexPotential potential(m_p.scalar_mass, m_p.lambda_interaction, m_p.kappa_interaction);
   ScalarFieldWithPotential scalar_field(potential);
   BoostedIsotropicBHFixedBG boosted_bh(m_p.bg_params, m_dx);
   BoxLoops::loop(FixedBGStress<ScalarFieldWithPotential,
@@ -127,7 +127,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     // Calculate right hand side with matter_t = ScalarField
     // and background_t = BoostedBH
     // RHS for non evolution vars is zero, to prevent undefined values
-  ComplexPotential potential(m_p.scalar_mass, m_p.lambda_interaction);
+  ComplexPotential potential(m_p.scalar_mass, m_p.lambda_interaction, m_p.kappa_interaction);
     ScalarFieldWithPotential scalar_field(potential);
     BoostedIsotropicBHFixedBG boosted_bh(m_p.bg_params, m_dx);
     FixedBGEvolution<ScalarFieldWithPotential, BoostedIsotropicBHFixedBG> my_evolution(
