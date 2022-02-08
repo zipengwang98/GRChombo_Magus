@@ -17,7 +17,7 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     const vars_t<data_t> &vars, const MetricVars<data_t> &metric_vars,
     const vars_t<Tensor<1, data_t>> &d1, const Tensor<2, data_t> &gamma_UU,
     const Tensor<3, data_t> &chris_phys_ULL) const
-  {
+{
     // The total em tensor
     emtensor_t<data_t> out;
 
@@ -26,18 +26,18 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     // Useful quantity Vt
     data_t Vt = -vars.Pi_Re * vars.Pi_Re - vars.Pi_Im * vars.Pi_Im;
     FOR2(i, j)
-      {
+    {
         Vt += gamma_UU[i][j] * d1.phi_Re[i] * d1.phi_Re[j] +
-	      gamma_UU[i][j] * d1.phi_Im[i] * d1.phi_Im[j];
-      }
+              gamma_UU[i][j] * d1.phi_Im[i] * d1.phi_Im[j];
+    }
     // Calculate components of EM Tensor
     // S_ij = T_ij
     FOR2(i, j)
-      {
-	out.Sij[i][j] = -0.5 * metric_vars.gamma[i][j] * Vt +
+    {
+        out.Sij[i][j] = -0.5 * metric_vars.gamma[i][j] * Vt +
                         d1.phi_Re[i] * d1.phi_Re[j] +
-	                d1.phi_Im[i] * d1.phi_Im[j];
-      }
+                        d1.phi_Im[i] * d1.phi_Im[j];
+    }
 
     // S = Tr_S_ij
     out.S = TensorAlgebra::compute_trace(out.Sij, gamma_UU);
@@ -45,7 +45,7 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     // S_i (note lower index) = - n^a T_ai
     FOR1(i)
     {
-	out.Si[i] = -d1.phi_Re[i] * vars.Pi_Re - d1.phi_Im[i] * vars.Pi_Im;
+        out.Si[i] = -d1.phi_Re[i] * vars.Pi_Re - d1.phi_Im[i] * vars.Pi_Im;
     }
 
     // rho = n^a n^b T_ab
@@ -60,7 +60,7 @@ emtensor_t<data_t> FixedBGComplexScalarField<potential_t>::compute_emtensor(
     // calculate total emtensor including potential terms
     out.rho = out.rho + V_of_phi;
     out.S = out.S - 3.0 * V_of_phi;
-    FOR2(i, j){ out.Sij[i][j] += -metric_vars.gamma[i][j] * V_of_phi; }
+    FOR2(i, j) { out.Sij[i][j] += -metric_vars.gamma[i][j] * V_of_phi; }
 
     return out;
 }
@@ -83,9 +83,11 @@ void FixedBGComplexScalarField<potential_t>::matter_rhs(
 
     // evolution equations for scalar field and (minus) its conjugate momentum
     total_rhs.phi_Re = metric_vars.lapse * vars.Pi_Re + advec.phi_Re;
-    total_rhs.Pi_Re = metric_vars.lapse * metric_vars.K * vars.Pi_Re + advec.Pi_Re;
+    total_rhs.Pi_Re =
+        metric_vars.lapse * metric_vars.K * vars.Pi_Re + advec.Pi_Re;
     total_rhs.phi_Im = metric_vars.lapse * vars.Pi_Im + advec.phi_Im;
-    total_rhs.Pi_Im = metric_vars.lapse * metric_vars.K * vars.Pi_Im + advec.Pi_Im;
+    total_rhs.Pi_Im =
+        metric_vars.lapse * metric_vars.K * vars.Pi_Im + advec.Pi_Im;
 
     FOR2(i, j)
     {

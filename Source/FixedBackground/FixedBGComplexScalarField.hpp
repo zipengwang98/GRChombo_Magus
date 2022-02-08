@@ -27,11 +27,12 @@
      are phi and (minus) its conjugate momentum, Pi (re and im).
      It is templated over a potential function potential_t which the user must
      specify in a class, although a default is provided which sets dVdphi and
-     V_of_phi to zero. 
+     V_of_phi to zero.
      Note that for this fixed background case the backreaction on the metric
-     of the field is ignored, so constraints are not satisfied.  
+     of the field is ignored, so constraints are not satisfied.
 */
-template <class potential_t = DefaultComplexPotential> class FixedBGComplexScalarField
+template <class potential_t = DefaultComplexPotential>
+class FixedBGComplexScalarField
 {
   protected:
     //! The local copy of the potential
@@ -90,13 +91,13 @@ template <class potential_t = DefaultComplexPotential> class FixedBGComplexScala
     emtensor_t<data_t> compute_emtensor(
         const vars_t<data_t>
             &vars, //!< the value of the variables at the point.
-	const MetricVars<data_t>
-	&metric_vars, //!< the value of the metric variables
+        const MetricVars<data_t>
+            &metric_vars, //!< the value of the metric variables
         const vars_t<Tensor<1, data_t>> &d1, //!< the value of the 1st derivs
         const Tensor<2, data_t>
-	&gamma_UU, //!< the inverse metric (raised indices)
+            &gamma_UU, //!< the inverse metric (raised indices)
         const Tensor<3, data_t> &chris_phys_ULL)
-      const; //!< the physical christoffel symbol    
+        const; //!< the physical christoffel symbol
 
     //! The function which adds in the RHS for the matter field vars
     template <class data_t, template <typename> class vars_t,
@@ -105,11 +106,11 @@ template <class potential_t = DefaultComplexPotential> class FixedBGComplexScala
         vars_t<data_t> &total_rhs,  //!< contains the value of the RHS vars.
         const vars_t<data_t> &vars, //!< the value of the vars at the point.
         const MetricVars<data_t>
-	&metric_vars, //!< the value of the metric variables 
+            &metric_vars, //!< the value of the metric variables
         const vars_t<Tensor<1, data_t>> &d1, //!< the value of the 1st derivs.
         const diff2_vars_t<Tensor<2, data_t>> &d2, //!< the 2nd derivs of vars
         const vars_t<data_t> &advec                //!< the advection terms
-        ) const;
+    ) const;
 };
 
 #include "FixedBGComplexScalarField.impl.hpp"

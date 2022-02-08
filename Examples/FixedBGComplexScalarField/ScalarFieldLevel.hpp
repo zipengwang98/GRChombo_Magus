@@ -9,8 +9,8 @@
 #include "DefaultLevelFactory.hpp"
 #include "GRAMRLevel.hpp"
 // Problem specific includes
-#include "FixedBGComplexScalarField.hpp"
 #include "ComplexPotential.hpp"
+#include "FixedBGComplexScalarField.hpp"
 
 //!  A class for the evolution of a scalar field, minimally coupled to gravity
 /*!
@@ -24,7 +24,8 @@ class ScalarFieldLevel : public GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
 
     // Typedef for scalar field
-    typedef FixedBGComplexScalarField<ComplexPotential> ScalarFieldWithPotential;
+    typedef FixedBGComplexScalarField<ComplexPotential>
+        ScalarFieldWithPotential;
 
     //! Things to do at the end of the advance step, after RK4 calculation
     virtual void specificAdvance();
@@ -39,11 +40,12 @@ class ScalarFieldLevel : public GRAMRLevel
     // to do post each time step on every level
     virtual void specificPostTimeStep();
 
-    // Any actions that should happen just before plot files output 
+    // Any actions that should happen just before plot files output
     virtual void prePlotLevel();
 
     //! Specify which variables to write at plot intervals
-  //    virtual void specificWritePlotHeader(std::vector<int> &plot_states) const;
+    //    virtual void specificWritePlotHeader(std::vector<int> &plot_states)
+    //    const;
 
     //! Tell Chombo how to tag cells for regridding
     virtual void computeTaggingCriterion(FArrayBox &tagging_criterion,

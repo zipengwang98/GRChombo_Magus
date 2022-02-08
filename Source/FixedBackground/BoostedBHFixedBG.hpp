@@ -133,7 +133,7 @@ class BoostedBHFixedBG
         }
 
         // use the fact that shift^i = lapse^2 * shift_i + v^i
-        // and v^i is a constant vector  
+        // and v^i is a constant vector
 
         FOR2(i, j)
         {
@@ -191,7 +191,7 @@ class BoostedBHFixedBG
         const data_t r2 = x_p * x_p + x[1] * x[1] + x[2] * x[2];
         const data_t r = sqrt(r2);
 
-	// find the H, A, B metric quantities   
+        // find the H, A, B metric quantities
         const data_t H = 0.5 * M / r;
         const data_t sqrtA = (1.0 - H) / (1.0 + H);
         const data_t A = sqrtA * sqrtA;
