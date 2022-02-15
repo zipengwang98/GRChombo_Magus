@@ -47,7 +47,6 @@ class SimulationParameters : public FixedBGSimulationParametersBase
     double inner_r, outer_r;
     // Collection of parameters necessary for the sims
     BoostedBHFixedBG::params_t bg_params;
-    SphericalExtraction::params_t extraction_params;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */
