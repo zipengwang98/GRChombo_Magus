@@ -165,6 +165,18 @@ class BoostedBHFixedBG
             vars.K_tensor[i][j] *= 0.5 / vars.lapse;
         }
         vars.K = compute_trace(gamma_UU, vars.K_tensor);
+        // DEBUG
+        /*
+        FOR3(i, j, k){
+            vars.d1_gamma[i][j][k] = 0;
+        }
+        FOR1(i){
+            vars.d1_lapse[i] = 0;
+        }
+        FOR2(i,j){
+            vars.d1_shift[i][j] = 0;
+        }
+        */
     }
 
   protected:

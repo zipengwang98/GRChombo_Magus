@@ -1,0 +1,1 @@
+gammaLL[0][1] = (x*pow(boost,2)*(-(func3*y) + pow(func0,2)*(func1 + func2/pow(r,2))*y - 2*a*M*V*rBL))/func0;

@@ -1,0 +1,1 @@
+gammaLL[2][2] = (func0*(pow(y,2) + func2*pow(r,4)*pow(z,2) + pow(x,2)*pow(boost,2)))/pow(r,6);

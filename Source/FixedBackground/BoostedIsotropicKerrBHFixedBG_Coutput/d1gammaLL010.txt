@@ -1,0 +1,1 @@
+d1gammaLL[0][1][0] = pow(boost,2)*(((func2 + func1*pow(r,2))*x*y*boost*dx_func0)/pow(r,2) + (x*boost*(func3*y + 2*a*M*V*rBL)*dx_func0)/pow(func0,2) + func0*y*(func1 + (r*x*boost*(pow(r,2)*dx_func1 + dx_func2) + func2*(r - 2*x*boost*dx_r))/pow(r,3)) - (func3*y + 2*a*M*V*rBL + x*y*boost*dx_func3 + 2*a*M*V*x*boost*dx_r*d_rBL)/func0);
