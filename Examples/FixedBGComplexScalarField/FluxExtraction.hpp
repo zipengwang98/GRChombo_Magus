@@ -24,7 +24,9 @@ class FluxExtraction : public SphericalExtraction
         : SphericalExtraction(a_params, a_dt, a_time, a_first_step,
                               a_restart_time)
     {
-        add_var(c_Mdot, VariableType::diagnostic);
+        add_var(c_xMdot, VariableType::diagnostic);
+        add_var(c_yMdot, VariableType::diagnostic);
+        add_var(c_zMdot, VariableType::diagnostic);
         add_var(c_Edot, VariableType::diagnostic);
     }
 
@@ -40,7 +42,9 @@ class FluxExtraction : public SphericalExtraction
     // the references of the vars as used in the integrator
     enum M_VARS
     {
-        m_Mdot,
+        m_xMdot,
+        m_yMdot,
+        m_zMdot,
         m_Edot,
         NUM_COMPS
     };
@@ -59,8 +63,12 @@ class FluxExtraction : public SphericalExtraction
 
         // Setup to integrate fluxes
         std::vector<std::vector<double>> force_integrals(NUM_COMPS);
-        add_var_integrand(m_Mdot, force_integrals[m_Mdot],
+        add_var_integrand(m_xMdot, force_integrals[m_xMdot],
                           IntegrationMethod::simpson);
+        add_var_integrand(m_yMdot, force_integrals[m_yMdot],
+                          IntegrationMethod::simpson);
+        add_var_integrand(m_zMdot, force_integrals[m_zMdot],
+                          IntegrationMethod::simpson);                                                    
         add_var_integrand(m_Edot, force_integrals[m_Edot],
                           IntegrationMethod::simpson);
 
@@ -69,7 +77,9 @@ class FluxExtraction : public SphericalExtraction
 
         // write the integrals
         std::vector<std::string> labels(NUM_COMPS);
-        labels[m_Mdot] = "Mom Flux";
+        labels[m_xMdot] = "xMom Flux";
+        labels[m_yMdot] = "yMom Flux";
+        labels[m_zMdot] = "zMom Flux";
         labels[m_Edot] = "E Flux";
         std::string filename = "FluxIntegrals";
         write_integrals(filename, force_integrals, labels);

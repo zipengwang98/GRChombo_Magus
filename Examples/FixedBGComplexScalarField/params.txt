@@ -1,9 +1,9 @@
 #Params for runtime inputs
 
 verbosity = 0
-chk_prefix = /cosma6/data/dp174/dc-tray2/FixedBGRComplex/mu005/v03_chk_
-plot_prefix = /cosma6/data/dp174/dc-tray2/FixedBGRComplex/mu005/v03_plt_
-#restart_file = 
+chk_prefix = v03_chk_
+plot_prefix = v03_plt_
+#restart_file = v03_chk_000200.3d.hdf5
 
 # Set up grid spacings and regrid params
 # NB - the N values need to be multiples of block_factor
@@ -51,7 +51,7 @@ lo_boundary = 3 2 2
 # 1,2,3 = odd x, y, z
 # 4,5,6 = odd xy, yz, xz
 vars_parity            = 0 0 0 0   #phi and Pi
-vars_parity_diagnostic = 0 0 0 0 0 0 #chi and rho Source xMom Mdot Edot
+vars_parity_diagnostic = 0 0 0 0 0 0 0 0 #chi and rho Source xMom xMdot yMdot zMdot Edot
 
 # specify non zero asympotitic vars
 num_nonzero_asymptotic_vars = 0
@@ -84,6 +84,7 @@ scalar_amplitude = 0.1
 # Boosted BH initial data, boost in x direction
 bh_mass = 1.0
 bh_velocity = 0.3
+bh_spin = 0.0
 
 # For volume integrals
 inner_r = 3.0

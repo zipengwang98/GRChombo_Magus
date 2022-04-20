@@ -11,7 +11,7 @@
 #include "FixedBGSimulationParametersBase.hpp"
 #include "GRParmParse.hpp"
 // Problem specific includes:
-#include "BoostedBHFixedBG.hpp"
+#include "BoostedIsotropicKerrFixedBG.hpp"
 #include "ComplexPotential.hpp"
 
 class SimulationParameters : public FixedBGSimulationParametersBase
@@ -32,6 +32,7 @@ class SimulationParameters : public FixedBGSimulationParametersBase
         pp.load("bh_mass", bg_params.mass);
         pp.load("bh_velocity", bg_params.velocity);
         pp.load("bh_center", bg_params.center, center);
+        pp.load("bh_spin", bg_params.spin);
 
         // Initial SF
         pp.load("scalar_amplitude", scalar_amplitude);
@@ -46,7 +47,7 @@ class SimulationParameters : public FixedBGSimulationParametersBase
     double scalar_amplitude, scalar_mass, regrid_length;
     double inner_r, outer_r;
     // Collection of parameters necessary for the sims
-    BoostedBHFixedBG::params_t bg_params;
+    BoostedIsotropicKerrFixedBG::params_t bg_params;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */

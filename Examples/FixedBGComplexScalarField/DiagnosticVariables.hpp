@@ -13,7 +13,9 @@ enum
     c_rho,
     c_Source,
     c_xMom,
-    c_Mdot, // Momentum flux
+    c_xMdot, // Momentum flux
+    c_yMdot, // Momentum flux
+    c_zMdot, // Momentum flux
     c_Edot, // Energy flux
 
     NUM_DIAGNOSTIC_VARS

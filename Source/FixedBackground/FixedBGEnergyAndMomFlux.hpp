@@ -90,20 +90,25 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
 
         FOR1(i) { si_L[i] = si_L[i] / sqrt(si_norm); }
 
-        data_t Mdot = 0.0;
-        FOR1(i)
-        {
-            Mdot += -metric_vars.shift[i] * si_L[i] * emtensor.Si[0];
+        Tensor<1,data_t> Mdot ;
+        FOR1(i){Mdot[i] = 0;}
+        FOR1(i){
             FOR1(j)
             {
-                Mdot += metric_vars.lapse * gamma_UU[i][j] *
-                        emtensor.Sij[0][j] * si_L[i];
+                Mdot[i] += -metric_vars.shift[j] * si_L[j] * emtensor.Si[i];
+                FOR1(k)
+                {
+                    Mdot[i] += metric_vars.lapse * gamma_UU[j][k] *
+                            emtensor.Sij[i][k] * si_L[j];
+                }
             }
         }
-
         // dArea is the integration surface element; Divide by r2sintheta,
         // as that's accounted for in the SprericalExtraction
-        Mdot *= dArea / r2sintheta;
+        FOR(i){
+            Mdot[i] *= dArea / r2sintheta;
+        }
+        
 
         data_t Edot = 0.0;
         FOR1(i)
@@ -123,7 +128,9 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
 
         Edot *= dArea / r2sintheta;
 
-        current_cell.store_vars(Mdot, c_Mdot);
+        current_cell.store_vars(Mdot[0], c_xMdot);
+        current_cell.store_vars(Mdot[1], c_yMdot);
+        current_cell.store_vars(Mdot[2], c_zMdot);
         current_cell.store_vars(Edot, c_Edot);
     }
 };
