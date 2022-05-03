@@ -9,15 +9,16 @@
 // General includes
 #include "ChomboParameters.hpp"
 #include "FixedBGSimulationParametersBase.hpp"
+#include "SimulationParametersBase.hpp"
 #include "GRParmParse.hpp"
 // Problem specific includes:
 #include "BoostedIsotropicKerrFixedBG.hpp"
 #include "ComplexPotential.hpp"
 
-class SimulationParameters : public FixedBGSimulationParametersBase
+class SimulationParameters : public SimulationParametersBase
 {
   public:
-    SimulationParameters(GRParmParse &pp) : FixedBGSimulationParametersBase(pp)
+    SimulationParameters(GRParmParse &pp) : SimulationParametersBase(pp)
     {
         // read the problem specific params
         readParams(pp);
@@ -48,6 +49,7 @@ class SimulationParameters : public FixedBGSimulationParametersBase
     double inner_r, outer_r;
     // Collection of parameters necessary for the sims
     BoostedIsotropicKerrFixedBG::params_t bg_params;
+    double G_Newton;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */

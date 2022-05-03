@@ -10,7 +10,8 @@
 #include "GRAMRLevel.hpp"
 // Problem specific includes
 #include "ComplexPotential.hpp"
-#include "FixedBGComplexScalarField.hpp"
+#include "ComplexScalarField.hpp"
+//#include "FixedBGComplexScalarField.hpp"
 
 //!  A class for the evolution of a scalar field, minimally coupled to gravity
 /*!
@@ -24,7 +25,7 @@ class ScalarFieldLevel : public GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
 
     // Typedef for scalar field
-    typedef FixedBGComplexScalarField<ComplexPotential>
+    typedef ComplexScalarField<ComplexPotential>
         ScalarFieldWithPotential;
 
     //! Things to do at the end of the advance step, after RK4 calculation

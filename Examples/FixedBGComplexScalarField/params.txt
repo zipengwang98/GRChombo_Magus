@@ -50,7 +50,11 @@ lo_boundary = 3 2 2
 # 0 = even
 # 1,2,3 = odd x, y, z
 # 4,5,6 = odd xy, yz, xz
-vars_parity            = 0 0 0 0   #phi and Pi
+vars_parity            = 0 0 4 6 0 5 0    #chi and hij
+                         0 0 4 6 0 5 0    #K and Aij
+                         0 1 2 3          #Theta and Gamma
+                         0 1 2 3 1 2 3    #lapse shift and B
+                         0 0 0 0   #phi and Pi
 vars_parity_diagnostic = 0 0 0 0 0 0 0 0 #chi and rho Source xMom xMdot yMdot zMdot Edot
 
 # specify non zero asympotitic vars

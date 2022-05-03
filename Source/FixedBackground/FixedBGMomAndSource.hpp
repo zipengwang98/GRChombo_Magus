@@ -26,6 +26,23 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
     template <class data_t>
     using MatterVars = typename matter_t::template Vars<data_t>;
 
+    template <class data_t>
+    using CCZ4Vars = typename CCZ4::template Vars<data_t>;
+
+    // Inherit the variable definitions from CCZ4RHS + matter_t
+    template <class data_t>
+    struct Vars : public CCZ4Vars<data_t>, public MatterVars<data_t>
+    {
+        /// Defines the mapping between members of Vars and Chombo grid
+        /// variables (enum in User_Variables)
+        template <typename mapping_function_t>
+        void enum_mapping(mapping_function_t mapping_function)
+        {
+            CCZ4Vars<data_t>::enum_mapping(mapping_function);
+            MatterVars<data_t>::enum_mapping(mapping_function);
+        }
+    };
+
     // Now the non grid ADM vars
     template <class data_t> using MetricVars = ADMFixedBGVars::Vars<data_t>;
 
@@ -48,8 +65,8 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
         // copy data from chombo gridpoint into local variables, and derivs
-        const auto vars = current_cell.template load_vars<MatterVars>();
-        const auto d1 = m_deriv.template diff1<MatterVars>(current_cell);
+        const auto vars = current_cell.template load_vars<Vars>();
+        const auto d1 = m_deriv.template diff1<Vars>(current_cell);
 
         // get the metric vars from the background
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
@@ -61,10 +78,15 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
         using namespace CoordinateTransformations;
         //	const auto gamma = metric_vars.gamma;
         const auto gamma_UU = compute_inverse_sym(metric_vars.gamma);
+        const auto chi = compute_determinant_sym(metric_vars.gamma);
+        Tensor<2,data_t> h_UU;
+        FOR(i,j){
+            h_UU[i][j] = gamma_UU[i][j] / chi;
+        }
         const auto chris_phys =
-            compute_christoffel(metric_vars.d1_gamma, gamma_UU);
+            compute_christoffel(d1.h, h_UU);
         const emtensor_t<data_t> emtensor = m_matter.compute_emtensor(
-            vars, metric_vars, d1, gamma_UU, chris_phys.ULL);
+            vars, d1, h_UU, chris_phys.ULL);
         const data_t det_gamma = compute_determinant_sym(metric_vars.gamma);
 
         data_t xMom = -emtensor.Si[0] * sqrt(det_gamma);

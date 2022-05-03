@@ -10,7 +10,7 @@
 #include "BoostedIsotropicKerrFixedBG.hpp"
 #include "Cell.hpp"
 #include "Coordinates.hpp"
-#include "FixedBGComplexScalarField.hpp"
+#include "ComplexScalarField.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total no. components
 #include "VarsTools.hpp"
@@ -46,7 +46,7 @@ class ScalarConstant
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
 
-        FixedBGComplexScalarField<>::Vars<data_t> vars;
+        ComplexScalarField<>::Vars<data_t> vars;
 
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
 

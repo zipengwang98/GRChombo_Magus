@@ -14,7 +14,9 @@
 
 // For RHS update
 #include "BoostedIsotropicKerrFixedBG.hpp"
-#include "FixedBGEvolution.hpp"
+//#include "FixedBGEvolution.hpp"
+#include "FAKEMatterCCZ4RHS.hpp"
+#include "FourthOrderDerivatives.hpp"
 
 // For tag cells
 #include "FixedGridsTaggingCriterion.hpp"
@@ -23,7 +25,7 @@
 #include "ComplexPotential.hpp"
 #include "ExcisionDiagnostics.hpp"
 #include "ExcisionEvolution.hpp"
-#include "FixedBGComplexScalarField.hpp"
+#include "ComplexScalarField.hpp"
 #include "FixedBGEnergyAndMomFlux.hpp"
 #include "FixedBGMomAndSource.hpp"
 #include "FluxExtraction.hpp"
@@ -140,10 +142,17 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     ComplexPotential potential(m_p.scalar_mass);
     ScalarFieldWithPotential scalar_field(potential);
     BoostedIsotropicKerrFixedBG boosted_bh(m_p.bg_params, m_dx);
+    MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGauge,
+                      FourthOrderDerivatives>
+            my_ccz4_matter(scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
+                           m_p.formulation, m_p.G_Newton);
+    BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+    /*
     FixedBGEvolution<ScalarFieldWithPotential, BoostedIsotropicKerrFixedBG> my_evolution(
         scalar_field, boosted_bh, m_p.sigma, m_dx, m_p.center);
 
     BoxLoops::loop(my_evolution, a_soln, a_rhs, SKIP_GHOST_CELLS);
+    */
 
     // Do excision within horizon
     BoxLoops::loop(
