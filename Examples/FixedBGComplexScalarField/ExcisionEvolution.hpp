@@ -17,7 +17,7 @@
 
 //! Does excision for fixed BG BH solutions
 //! Note that it is does not using simd so one must set disable_simd()
-template <class matter_t, class background_t> class ExcisionEvolution
+template <class matter_t> class ExcisionEvolution
 {
     // Use matter_t class
     using Vars = typename matter_t::template Vars<double>;
@@ -26,21 +26,42 @@ template <class matter_t, class background_t> class ExcisionEvolution
     const double m_dx;                              //!< The grid spacing
     const std::array<double, CH_SPACEDIM> m_center; //!< The BH center
     const FourthOrderDerivatives m_deriv;
-    const background_t m_background;
 
   public:
+
+    BoostedIsotropicKerr::params_t m_params;
+
     ExcisionEvolution(const double a_dx,
                       const std::array<double, CH_SPACEDIM> a_center,
-                      background_t a_background)
-        : m_dx(a_dx), m_deriv(m_dx), m_center(a_center),
-          m_background(a_background)
+                      BoostedIsotropicKerr::params_t a_params)
+        : m_dx(a_dx), m_deriv(m_dx), m_center(a_center), m_params(a_params)
     {
     }
 
     void compute(const Cell<double> current_cell) const
     {
         const Coordinates<double> coords(current_cell, m_dx, m_center);
-        double horizon_distance = m_background.excise(current_cell);
+
+        const double velocity = m_params.velocity;
+        const double M = m_params.mass;
+        const double a = m_params.spin;
+        const double boost =
+            pow(1.0 - velocity * velocity, -0.5);
+
+        // work out where we are on the grid including effect of boost
+        // on x direction (length contraction)
+        const double x_p = coords.x * boost;
+        const double y = coords.y;
+        const double z = coords.z;
+
+        // the coordinate radius (boosted)
+        const double r2 = x_p * x_p + y * y + z * z;
+
+        // compare this to horizon in isotropic coords
+        double rp = M + sqrt(M * M - a * a);
+        const double r_horizon = rp;
+
+        double horizon_distance = sqrt(r2) / r_horizon;
         if (horizon_distance < 0.5)
         {
             // the matter rhs vars within the excision zone

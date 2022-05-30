@@ -1,6 +1,6 @@
 #Params for runtime inputs
 
-verbosity = 0
+verbosity = 10
 chk_prefix = v03_chk_
 plot_prefix = v03_plt_
 #restart_file = v03_chk_000200.3d.hdf5

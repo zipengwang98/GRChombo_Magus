@@ -71,15 +71,17 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
         // get the metric vars from the background
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
 
-        MetricVars<data_t> metric_vars;
-        m_background.compute_metric_background(metric_vars, current_cell);
+        Vars<data_t> metric_vars;
+        //m_background.compute_metric_background(metric_vars, current_cell);
 
         using namespace TensorAlgebra;
         using namespace CoordinateTransformations;
-        //	const auto gamma = metric_vars.gamma;
-        const auto gamma_UU = compute_inverse_sym(metric_vars.gamma);
-        const auto chi = compute_determinant_sym(metric_vars.gamma);
-        Tensor<2,data_t> h_UU;
+        Tensor<2,data_t> h_UU, gamma;
+        FOR(i,j){
+            gamma[i][j] = vars.h[i][j] / vars.chi;
+        }
+        const auto gamma_UU = compute_inverse_sym(gamma);
+        const auto chi = vars.chi;
         FOR(i,j){
             h_UU[i][j] = gamma_UU[i][j] / chi;
         }
@@ -87,15 +89,15 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
             compute_christoffel(d1.h, h_UU);
         const emtensor_t<data_t> emtensor = m_matter.compute_emtensor(
             vars, d1, h_UU, chris_phys.ULL);
-        const data_t det_gamma = compute_determinant_sym(metric_vars.gamma);
+        const data_t det_gamma = compute_determinant_sym(gamma);
 
         data_t xMom = -emtensor.Si[0] * sqrt(det_gamma);
 
-        data_t Source = -emtensor.rho * metric_vars.d1_lapse[0];
+        data_t Source = -emtensor.rho * d1.lapse[0];
 
         FOR1(i)
         {
-            Source += emtensor.Si[i] * metric_vars.d1_shift[i][0];
+            Source += emtensor.Si[i] * d1.shift[i][0];
             FOR2(j, k)
             {
                 Source += metric_vars.lapse * gamma_UU[i][k] *

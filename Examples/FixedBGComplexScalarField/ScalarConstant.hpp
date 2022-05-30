@@ -7,7 +7,7 @@
 #define SCALARCONSTANT_HPP_
 
 #include "ADMFixedBGVars.hpp"
-#include "BoostedIsotropicKerrFixedBG.hpp"
+#include "BoostedIsotropicKerr.hpp"
 #include "Cell.hpp"
 #include "Coordinates.hpp"
 #include "ComplexScalarField.hpp"
@@ -27,15 +27,15 @@ class ScalarConstant
     const double m_amplitude;
     const double m_mu;
     const std::array<double, CH_SPACEDIM> m_center;
-    const BoostedIsotropicKerrFixedBG::params_t m_bg_params;
+    const BoostedIsotropicKerr::params_t m_bg_params;
 
-    template <class data_t> using MetricVars = ADMFixedBGVars::Vars<data_t>;
+    template <class data_t> using Vars = CCZ4Vars::VarsWithGauge<data_t>;
 
   public:
     //! The constructor for the class
     ScalarConstant(const double a_amplitude, const double a_mu,
                    const std::array<double, CH_SPACEDIM> a_center,
-                   const BoostedIsotropicKerrFixedBG::params_t a_bg_params,
+                   const BoostedIsotropicKerr::params_t a_bg_params,
                    const double a_dx)
         : m_amplitude(a_amplitude), m_mu(a_mu), m_center(a_center),
           m_bg_params(a_bg_params), m_dx(a_dx)
@@ -51,9 +51,11 @@ class ScalarConstant
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
 
         // get the metric vars
-        BoostedIsotropicKerrFixedBG boosted_bh(m_bg_params, m_dx);
-        MetricVars<data_t> metric_vars;
+        BoostedIsotropicKerr boosted_bh(m_bg_params, m_dx);
+        Vars<data_t> metric_vars;
         boosted_bh.compute_metric_background(metric_vars, current_cell);
+        //boosted_bh.compute(current_cell);
+
 
         // set the field vars
         vars.phi_Re = m_amplitude;

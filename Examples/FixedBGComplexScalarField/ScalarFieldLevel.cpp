@@ -13,7 +13,7 @@
 #include "SmallDataIO.hpp"
 
 // For RHS update
-#include "BoostedIsotropicKerrFixedBG.hpp"
+#include "BoostedIsotropicKerr.hpp"
 //#include "FixedBGEvolution.hpp"
 #include "FAKEMatterCCZ4RHS.hpp"
 #include "FourthOrderDerivatives.hpp"
@@ -50,19 +50,20 @@ void ScalarFieldLevel::initialData()
     // First set everything to zero ... we don't want undefined values in
     // constraints etc, then initial conditions for scalar field
     SetValue set_zero(0.0);
-    BoostedIsotropicKerrFixedBG boosted_bh(m_p.bg_params, m_dx);
+    BoostedIsotropicKerr boosted_bh(m_p.bg_params, m_dx);
     ScalarConstant initial_sf(m_p.scalar_amplitude, m_p.scalar_mass, m_p.center,
                               m_p.bg_params, m_dx);
     auto compute_pack = make_compute_pack(set_zero, boosted_bh);
 
-    BoxLoops::loop(compute_pack, m_state_diagnostics, m_state_diagnostics,
+
+    BoxLoops::loop(compute_pack, m_state_new, m_state_new,
                    SKIP_GHOST_CELLS);
     BoxLoops::loop(initial_sf, m_state_new, m_state_new, FILL_GHOST_CELLS);
 
     // excise within horizon, no simd
     BoxLoops::loop(
-        ExcisionEvolution<ScalarFieldWithPotential, BoostedIsotropicKerrFixedBG>(
-            m_dx, m_p.center, boosted_bh),
+        ExcisionEvolution<ScalarFieldWithPotential>(
+            m_dx, m_p.center, m_p.bg_params),
         m_state_new, m_state_new, SKIP_GHOST_CELLS, disable_simd());
 }
 
@@ -77,20 +78,22 @@ void ScalarFieldLevel::specificPostTimeStep()
         fillAllGhosts();
         ComplexPotential potential(m_p.scalar_mass);
         ScalarFieldWithPotential scalar_field(potential);
-        BoostedIsotropicKerrFixedBG boosted_bh(m_p.bg_params, m_dx);
-        FixedBGMomAndSource<ScalarFieldWithPotential, BoostedIsotropicKerrFixedBG>
+        BoostedIsotropicKerr boosted_bh(m_p.bg_params, m_dx);
+        FixedBGMomAndSource<ScalarFieldWithPotential, BoostedIsotropicKerr>
             densities(scalar_field, boosted_bh, m_dx, m_p.center);
-        FixedBGEnergyAndMomFlux<ScalarFieldWithPotential, BoostedIsotropicKerrFixedBG>
+        FixedBGEnergyAndMomFlux<ScalarFieldWithPotential, BoostedIsotropicKerr>
             fluxes(scalar_field, boosted_bh, m_dx, m_p.center);
         BoxLoops::loop(make_compute_pack(densities, fluxes), m_state_new,
                        m_state_diagnostics, SKIP_GHOST_CELLS);
 
         // excise within horizon, no simd
+        
         BoxLoops::loop(
-            ExcisionDiagnostics<ScalarFieldWithPotential, BoostedIsotropicKerrFixedBG>(
+            ExcisionDiagnostics<ScalarFieldWithPotential, BoostedIsotropicKerr>(
                 m_dx, m_p.center, boosted_bh, m_p.inner_r, m_p.outer_r),
             m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
             disable_simd());
+        
     }
 
     // write out the integral after each coarse timestep
@@ -141,7 +144,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     // RHS for non evolution vars is zero, to prevent undefined values
     ComplexPotential potential(m_p.scalar_mass);
     ScalarFieldWithPotential scalar_field(potential);
-    BoostedIsotropicKerrFixedBG boosted_bh(m_p.bg_params, m_dx);
+    BoostedIsotropicKerr boosted_bh(m_p.bg_params, m_dx);
     MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGauge,
                       FourthOrderDerivatives>
             my_ccz4_matter(scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
@@ -156,9 +159,11 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 
     // Do excision within horizon
     BoxLoops::loop(
-        ExcisionEvolution<ScalarFieldWithPotential, BoostedIsotropicKerrFixedBG>(
-            m_dx, m_p.center, boosted_bh),
-        a_soln, a_rhs, SKIP_GHOST_CELLS, disable_simd());
+        ExcisionEvolution<ScalarFieldWithPotential>(
+            m_dx, m_p.center, m_p.bg_params),
+        m_state_new, m_state_new, SKIP_GHOST_CELLS, disable_simd());
+
+    
 }
 
 // Note that for the fixed grids this only happens on the initial timestep

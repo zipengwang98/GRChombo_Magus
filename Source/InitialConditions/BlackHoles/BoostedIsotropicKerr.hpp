@@ -6,7 +6,7 @@
 #ifndef BOOSTEDISOTROPICKERR_HPP_
 #define BOOSTEDISOTROPICKERR_HPP_
 
-#include "ADMFixedBGVars.hpp"
+//#include "ADMFixedBGVars.hpp"
 #include "Cell.hpp"
 #include "Coordinates.hpp"
 #include "DimensionDefinitions.hpp"
@@ -14,6 +14,8 @@
 #include "TensorAlgebra.hpp"
 #include "UserVariables.hpp"
 #include "simd.hpp"
+#include "FAKEMatterCCZ4RHS.hpp"
+#include "CCZ4Vars.hpp"
 
 //! Class which computes the initial conditions for a boosted BH
 // in isotropic Schwazschild coords
@@ -35,8 +37,10 @@ class BoostedIsotropicKerr
         double velocity = 0.0; //!< The boost velocity in the x direction
     };
 
-    template <class data_t> using Vars = ADMFixedBGVars::Vars<data_t>;
+    //template <class data_t> using Vars = typename CCZ4::template Vars<data_t>;
+    template <class data_t> using Vars = CCZ4Vars::VarsWithGauge<data_t>;
 
+    //template <class data_t> using Vars = MatterCCZ4RHS::template Vars<data_t>;
     const params_t m_params;
     const double m_dx;
 
@@ -71,7 +75,7 @@ class BoostedIsotropicKerr
     template<class data_t>
     Tensor<2,data_t> get_gamma(double M, double a, double V, data_t x, double y, double z) const;
 
-    template<class data_t>
+    /*template<class data_t>
     Tensor<1,data_t> get_d1alpha(double M, double a, double V, data_t x, double y, double z) const;
 
     template<class data_t>
@@ -79,7 +83,7 @@ class BoostedIsotropicKerr
 
     template<class data_t>
     Tensor<3,data_t> get_d1gamma(double M, double a, double V, data_t x, double y, double z) const;
-
+    */
     template<class data_t>
     const Tensor<2,data_t> get_K(double M, double a, double V, data_t x, double y, double z) const;
 
@@ -93,10 +97,11 @@ class BoostedIsotropicKerr
                                    const Cell<data_t> &current_cell) const;
 
 
-  public:
+  /*public:
     // used to decide when to excise - ie when within the horizon of the BH
     // note that this is not templated over data_t
     double excise(const Cell<double> &current_cell) const;
+    */
     
 };
 #include "BoostedIsotropicKerr.impl.hpp"

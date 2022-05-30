@@ -72,28 +72,32 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
         // get the metric vars from the background
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
 
-        MetricVars<data_t> metric_vars;
-        m_background.compute_metric_background(metric_vars, current_cell);
+        Vars<data_t> metric_vars;
+        //m_background.compute_metric_background(metric_vars, current_cell);
 
         using namespace TensorAlgebra;
         using namespace CoordinateTransformations;
         //	const auto gamma = metric_vars.gamma;
- 
-        const auto gamma_UU = compute_inverse_sym(metric_vars.gamma);
-        const auto chi = compute_determinant_sym(metric_vars.gamma);
-        Tensor<2,data_t> h_UU;
+
+        Tensor<2,data_t> h_UU, gamma;
+        FOR(i,j){
+            gamma[i][j] = vars.h[i][j] / vars.chi;
+        }
+        const auto gamma_UU = compute_inverse_sym(gamma);
+        const auto chi = vars.chi;
         FOR(i,j){
             h_UU[i][j] = gamma_UU[i][j] / chi;
         }
+
         const auto chris_phys =
             compute_christoffel(d1.h, h_UU);
         const emtensor_t<data_t> emtensor = m_matter.compute_emtensor(
             vars, d1, h_UU, chris_phys.ULL);
         const auto lapse = metric_vars.lapse;
         const auto shift = metric_vars.shift;
-        const data_t det_gamma = compute_determinant_sym(metric_vars.gamma);
+        const data_t det_gamma = pow(metric_vars.chi, -3.0);
         Tensor<2, data_t> spherical_gamma = cartesian_to_spherical_LL(
-            metric_vars.gamma, coords.x, coords.y, coords.z);
+            gamma, coords.x, coords.y, coords.z);
         data_t dArea = area_element_sphere(spherical_gamma);
 
         const data_t R = coords.get_radius();

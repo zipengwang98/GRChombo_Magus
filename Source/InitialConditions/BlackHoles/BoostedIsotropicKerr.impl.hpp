@@ -15,7 +15,7 @@
 
 
     template <class data_t>
-    data_t get_func(double M, double a, double V, data_t x, double y, double z, int index) const{
+    data_t BoostedIsotropicKerr::get_func(double M, double a, double V, data_t x, double y, double z, int index) const{
         const double t = 0.0;
         const double v2 = V * V;
         const double boost2 = 1.0 / (1 - v2);
@@ -48,7 +48,7 @@
     }
 
     template <class data_t>
-    data_t get_d_func(double M, double a, double V, data_t x, double y, double z, int index, int d_index) const{
+    data_t BoostedIsotropicKerr::get_d_func(double M, double a, double V, data_t x, double y, double z, int index, int d_index) const{
         const double t = 0.0;
         const double v2 = V * V;
         const double boost2 = 1.0 / (1 - v2);
@@ -121,7 +121,7 @@
     }
 
     template <class data_t>
-    data_t get_alpha(double M, double a, double V, data_t x, double y, double z) const {
+    data_t BoostedIsotropicKerr::get_alpha(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -168,7 +168,7 @@
     }
 
     template<class data_t>
-    Tensor<1,data_t> get_beta(double M, double a, double V, data_t x, double y, double z) const {
+    Tensor<1,data_t> BoostedIsotropicKerr::get_beta(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -216,7 +216,7 @@
     }
 
     template<class data_t>
-    Tensor<2,data_t> get_gamma(double M, double a, double V, data_t x, double y, double z) const {
+    Tensor<2,data_t> BoostedIsotropicKerr::get_gamma(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -269,8 +269,8 @@
         return gammaLL;
     }
 
-    template<class data_t>
-    Tensor<1,data_t> get_d1alpha(double M, double a, double V, data_t x, double y, double z) const {
+    /*template<class data_t>
+    Tensor<1,data_t> BoostedIsotropicKerr::get_d1alpha(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -320,7 +320,7 @@
     }
 
     template<class data_t>
-    Tensor<2,data_t> get_d1beta(double M, double a, double V, data_t x, double y, double z) const {
+    Tensor<2,data_t> BoostedIsotropicKerr::get_d1beta(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -378,7 +378,7 @@
     }
 
     template<class data_t>
-    Tensor<3,data_t> get_d1gamma(double M, double a, double V, data_t x, double y, double z) const {
+    Tensor<3,data_t> BoostedIsotropicKerr::get_d1gamma(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -436,9 +436,9 @@
 
         return d1gammaLL;
     }
-
+    */
     template<class data_t>
-    const Tensor<2,data_t> get_K(double M, double a, double V, data_t x, double y, double z) const {
+    const Tensor<2,data_t> BoostedIsotropicKerr::get_K(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -494,34 +494,18 @@
 
     /// This just calculates chi which helps with regridding, debug etc
     /// it is only done once on setup as the BG is fixed
-    template <class data_t> void compute(Cell<data_t> current_cell) const
+    template <class data_t> void BoostedIsotropicKerr::compute(Cell<data_t> current_cell) const
     {
         // get position and set vars
 
-        Vars<data_t> metric_vars;
-        compute_metric_background(metric_vars, current_cell);
-
-        using namespace TensorAlgebra;
-        // calculate and save chi
-        data_t chi = compute_determinant_sym(metric_vars.gamma);
-        auto h_UU = compute_inverse_sym(metric_vars.h);
-        chi = pow(chi, -1.0 / 3.0);
-        metric_vars.K = compute_trace(metric_vars.K_tensor, h_UU);
-        metric_vars.A = metric_vars.K_tensor;
-        metric_vars.h = metric_vars.gamma;
-        make_trace_free(metric_vars.A, metric_vars.h, h_UU);
-        FOR(i, j)
-        {
-            metric_vars.h[i][j] *= metric_vars.chi;
-            metric_vars.A[i][j] *= metric_vars.chi;
-        }
-
-        current_cell.store_vars(metric_vars);
+        Vars<data_t> vars;
+        compute_metric_background(vars, current_cell);
+        current_cell.store_vars(vars);
     }
 
     /// Schwarzschild boosted solution as above
     template <class data_t, template <typename> class vars_t>
-    void compute_metric_background(vars_t<data_t> &vars,
+    void BoostedIsotropicKerr::compute_metric_background(vars_t<data_t> &vars,
                                    const Cell<data_t> &current_cell) const
     {
         // where am i?
@@ -549,15 +533,25 @@
         Tensor<2,data_t> K = get_K(M, a, V, x, y, z);
         
         vars.lapse = alpha;
-        FOR1(i){ vars.shift[i] = betaU[i]; } 
-        FOR2(i,j){ vars.gamma[i][j] = gamma[i][j]; }     
-        FOR2(i,j){ vars.K_tensor[i][j] = K[i][j]; }
+        FOR1(i){ vars.shift[i] = betaU[i]; }     
+        FOR2(i,j){ vars.A[i][j] = K[i][j]; }
 
         using namespace TensorAlgebra;
 
-        const auto gamma_UU = compute_inverse_sym(vars.gamma);
+        const auto gamma_UU = compute_inverse_sym(gamma);
                 
-        vars.K = compute_trace(gamma_UU, vars.K_tensor);
+        vars.K = compute_trace(K, gamma_UU );
+
+        data_t det_gamma = compute_determinant_sym(gamma);
+        vars.chi = pow(det_gamma, -1.0 / 3.0);
+
+        vars.K = compute_trace(vars.A, gamma_UU);
+        make_trace_free(vars.A, gamma, gamma_UU);
+        FOR(i, j)
+        {
+            vars.h[i][j] = gamma[i][j] *  vars.chi;
+            vars.A[i][j] *= vars.chi;
+        }
         /*
         Tensor<1,data_t> d1alpha = get_d1alpha(M, a, V, x, y, z);
         Tensor<2,data_t> d1betaU = get_d1beta(M, a, V, x, y, z);
@@ -581,11 +575,9 @@
         
     }
 
-
-  public:
     // used to decide when to excise - ie when within the horizon of the BH
     // note that this is not templated over data_t
-    double excise(const Cell<double> &current_cell) const
+    /*double BoostedIsotropicKerr::excise(const Cell<double> &current_cell) const
     {
         // black hole params - mass M and boost v
         // "boost" is the gamma factor for the boost
@@ -609,6 +601,6 @@
         const double r_horizon = rp;
 
         return sqrt(r2) / r_horizon;
-    }
+    }*/
 
 #endif /* BOOSTEDISOTROPICKERRBHFIXEDBG_HPP_ */

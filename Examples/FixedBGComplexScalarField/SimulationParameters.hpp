@@ -12,7 +12,7 @@
 #include "SimulationParametersBase.hpp"
 #include "GRParmParse.hpp"
 // Problem specific includes:
-#include "BoostedIsotropicKerrFixedBG.hpp"
+#include "BoostedIsotropicKerr.hpp"
 #include "ComplexPotential.hpp"
 
 class SimulationParameters : public SimulationParametersBase
@@ -48,7 +48,7 @@ class SimulationParameters : public SimulationParametersBase
     double scalar_amplitude, scalar_mass, regrid_length;
     double inner_r, outer_r;
     // Collection of parameters necessary for the sims
-    BoostedIsotropicKerrFixedBG::params_t bg_params;
+    BoostedIsotropicKerr::params_t bg_params;
     double G_Newton;
 };
 
