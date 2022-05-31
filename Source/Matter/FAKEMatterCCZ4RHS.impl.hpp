@@ -48,6 +48,22 @@ void MatterCCZ4RHS<matter_t, gauge_t, deriv_t>::compute(
     // Add dissipation to all terms
     this->m_deriv.add_dissipation(matter_rhs, current_cell, this->m_sigma);
 
+    //Set everything about metric background to zero
+    matter_rhs.K = 0;
+    matter_rhs.Theta = 0;
+    matter_rhs.chi = 0;
+    FOR1(i) {
+        matter_rhs.Gamma[i] = 0 ;
+        matter_rhs.shift[i] = 0;
+    }
+    FOR2(i,j) {
+        matter_rhs.h[i][j] = 0;
+        matter_rhs.A[i][j] = 0;
+    }
+    matter_rhs.lapse = 0;
+
+
+
     // Write the rhs into the output FArrayBox
     current_cell.store_vars(matter_rhs);
 }

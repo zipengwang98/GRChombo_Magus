@@ -59,7 +59,7 @@ template <class matter_t> class ExcisionEvolution
 
         // compare this to horizon in isotropic coords
         double rp = M + sqrt(M * M - a * a);
-        const double r_horizon = rp;
+        const double r_horizon = rp / 4.0;
 
         double horizon_distance = sqrt(r2) / r_horizon;
         if (horizon_distance < 0.5)

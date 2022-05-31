@@ -531,8 +531,15 @@
         Tensor<1,data_t> betaU = get_beta(M, a, V, x, y, z);
         Tensor<2,data_t> gamma = get_gamma(M, a, V, x, y, z);
         Tensor<2,data_t> K = get_K(M, a, V, x, y, z);
-        
-        vars.lapse = alpha;
+
+        const double boost = pow(1.0 - V * V, -0.5);
+        const data_t x_p = x * boost;
+        const data_t R = pow(x_p * x_p + y * y + z * z, 0.5);
+        double rp = M + sqrt(M * M - a * a);
+        data_t sign_lapse = (R - 0.25 * rp) / abs(R - 0.25 * rp);
+        vars.lapse = sign_lapse * alpha;
+        FOR2(i,j) K[i][j] = sign_lapse * K[i][j];
+
         FOR1(i){ vars.shift[i] = betaU[i]; }     
         FOR2(i,j){ vars.A[i][j] = K[i][j]; }
 

@@ -23,7 +23,7 @@ enum
 namespace DiagnosticVariables
 {
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
-    "rho", "Source", "xMom", "Mdot", "Edot"};
+    "rho", "Source", "xMom", "xMomFlux", "yMomFlux", "zMomflux", "Edot"};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */
