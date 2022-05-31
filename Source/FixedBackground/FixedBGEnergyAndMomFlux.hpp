@@ -43,8 +43,6 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
         }
     };
 
-    // Now the non grid ADM vars
-    template <class data_t> using MetricVars = ADMFixedBGVars::Vars<data_t>;
 
   protected:
     const FourthOrderDerivatives
@@ -72,7 +70,6 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
         // get the metric vars from the background
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
 
-        Vars<data_t> metric_vars;
         //m_background.compute_metric_background(metric_vars, current_cell);
 
         using namespace TensorAlgebra;
@@ -93,12 +90,13 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
             compute_christoffel(d1.h, h_UU);
         const emtensor_t<data_t> emtensor = m_matter.compute_emtensor(
             vars, d1, h_UU, chris_phys.ULL);
-        const auto lapse = metric_vars.lapse;
-        const auto shift = metric_vars.shift;
-        const data_t det_gamma = pow(metric_vars.chi, -3.0);
+        const auto lapse = vars.lapse;
+        const auto shift = vars.shift;
+        const data_t det_gamma = pow(vars.chi, -3.0);
         Tensor<2, data_t> spherical_gamma = cartesian_to_spherical_LL(
             gamma, coords.x, coords.y, coords.z);
         data_t dArea = area_element_sphere(spherical_gamma);
+        pout() << "dArea: " << dArea << endl;
 
         const data_t R = coords.get_radius();
         data_t rho2 =
@@ -122,10 +120,11 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
         FOR1(i){
             FOR1(j)
             {
-                Mdot[i] += -metric_vars.shift[j] * si_L[j] * emtensor.Si[i];
+                Mdot[i] += -vars.shift[j] * si_L[j] * emtensor.Si[i];
+                //pout() << "part of RHS of Mdot: " << -metric_vars.shift[j] * si_L[j] * emtensor.Si[i] << endl;
                 FOR1(k)
                 {
-                    Mdot[i] += metric_vars.lapse * gamma_UU[j][k] *
+                    Mdot[i] += vars.lapse * gamma_UU[j][k] *
                             emtensor.Sij[i][k] * si_L[j];
                 }
             }
