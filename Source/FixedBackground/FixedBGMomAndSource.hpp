@@ -91,25 +91,34 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
             vars, d1, h_UU, chris_phys.ULL);
         const data_t det_gamma = compute_determinant_sym(gamma);
 
-        data_t xMom = -emtensor.Si[0] * sqrt(det_gamma);
+        Tensor<1,data_t> Mom;
+        FOR1(i) Mom[i] = -emtensor.Si[i] * sqrt(det_gamma);
 
-        data_t Source = -emtensor.rho * d1.lapse[0];
+        Tensor<1,data_t> Source;
+        FOR1(i) Source[i] = -emtensor.rho * d1.lapse[i];
 
-        FOR1(i)
-        {
-            Source += emtensor.Si[i] * d1.shift[i][0];
-            FOR2(j, k)
+        FOR1(l){
+            FOR1(i)
             {
-                Source += metric_vars.lapse * gamma_UU[i][k] *
-                          emtensor.Sij[k][j] * chris_phys.ULL[j][i][0];
+                Source[l] += emtensor.Si[i] * d1.shift[i][l];
+                FOR2(j, k)
+                {
+                    Source[l] += metric_vars.lapse * gamma_UU[i][k] *
+                            emtensor.Sij[k][j] * chris_phys.ULL[j][i][l];
+                }
             }
         }
 
-        Source = Source * sqrt(det_gamma);
+        FOR1(i) Source[i] = Source[i] * sqrt(det_gamma);
 
         current_cell.store_vars(emtensor.rho, c_rho);
-        current_cell.store_vars(Source, c_Source);
-        current_cell.store_vars(xMom, c_xMom);
+        current_cell.store_vars(Source[0], c_xSource);
+        current_cell.store_vars(Source[1], c_ySource);
+        current_cell.store_vars(Source[2], c_zSource);
+        current_cell.store_vars(Mom[0], c_xMom);
+        current_cell.store_vars(Mom[1], c_yMom);
+        current_cell.store_vars(Mom[2], c_zMom);
+
     }
 };
 

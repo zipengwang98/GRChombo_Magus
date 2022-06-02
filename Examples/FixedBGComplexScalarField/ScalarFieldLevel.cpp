@@ -102,8 +102,12 @@ void ScalarFieldLevel::specificPostTimeStep()
         bool first_step = (m_time == m_dt);
         // integrate the densities and write to a file
         AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-        double Source_sum = amr_reductions.sum(c_Source);
+        double xSource_sum = amr_reductions.sum(c_xSource);
+        double ySource_sum = amr_reductions.sum(c_ySource);
+        double zSource_sum = amr_reductions.sum(c_zSource);
         double xMom_sum = amr_reductions.sum(c_xMom);
+        double yMom_sum = amr_reductions.sum(c_yMom);
+        double zMom_sum = amr_reductions.sum(c_zMom);
         double rho_sum = amr_reductions.sum(c_rho);
 
         SmallDataIO integral_file("SourceXMomRhoInts", m_dt, m_time,
@@ -112,12 +116,14 @@ void ScalarFieldLevel::specificPostTimeStep()
         // remove any duplicate data if this is post restart
         integral_file.remove_duplicate_time_data();
 
-        std::vector<double> data_for_writing = {Source_sum, xMom_sum, rho_sum};
+        std::vector<double> data_for_writing = {xSource_sum, ySource_sum, zSource_sum,
+                                 xMom_sum, yMom_sum, zMom_sum, rho_sum};
 
         // write data
         if (first_step)
         {
-            integral_file.write_header_line({"Source", "x-Mom", "rho"});
+            integral_file.write_header_line({"xSource", "ySource", "zSource",
+                                             "x-Mom", "y-Mom", "z-Mom", "rho"});
         }
         integral_file.write_time_data_line(data_for_writing);
 

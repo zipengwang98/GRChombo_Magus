@@ -10,8 +10,12 @@
 enum
 {
     c_rho,
-    c_Source,
+    c_xSource,
+    c_ySource,
+    c_zSource,
     c_xMom,
+    c_yMom,
+    c_zMom,
     c_xMdot, // Momentum flux
     c_yMdot, // Momentum flux
     c_zMdot, // Momentum flux
@@ -23,7 +27,7 @@ enum
 namespace DiagnosticVariables
 {
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
-    "rho", "Source", "xMom", "xMomFlux", "yMomFlux", "zMomflux", "Edot"};
+    "rho", "xSource", "ySource", "zSource", "xMom", "yMom", "zMom", "xMomFlux", "yMomFlux", "zMomflux", "Edot"};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */
