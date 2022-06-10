@@ -42,8 +42,12 @@ template <class matter_t, class background_t> class ExcisionDiagnostics
         const Coordinates<double> coords(current_cell, m_dx, m_center);
         if (coords.get_radius() < m_inner_r || coords.get_radius() > m_outer_r)
         {
-            current_cell.store_vars(0.0, c_Source);
+            current_cell.store_vars(0.0, c_xSource);
+            current_cell.store_vars(0.0, c_ySource);
+            current_cell.store_vars(0.0, c_zSource);
             current_cell.store_vars(0.0, c_xMom);
+            current_cell.store_vars(0.0, c_yMom);
+            current_cell.store_vars(0.0, c_zMom);
             current_cell.store_vars(0.0, c_rho);
         }
     }

@@ -177,6 +177,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
 void ScalarFieldLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                                const FArrayBox &current_state)
 {
+    //pout() << "m_P center: " << m_p.center[0] << m_p.center[1] << m_p.center[2] << endl;
     BoxLoops::loop(FixedGridsTaggingCriterion(m_dx, m_level, m_p.regrid_length,
                                               m_p.center),
                    current_state, tagging_criterion, disable_simd());

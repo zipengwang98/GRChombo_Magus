@@ -71,7 +71,7 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
         // get the metric vars from the background
         Coordinates<data_t> coords(current_cell, m_dx, m_center);
 
-        Vars<data_t> metric_vars;
+        //Vars<data_t> metric_vars;
         //m_background.compute_metric_background(metric_vars, current_cell);
 
         using namespace TensorAlgebra;
@@ -85,10 +85,11 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
         FOR(i,j){
             h_UU[i][j] = gamma_UU[i][j] / chi;
         }
-        const auto chris_phys =
+        const auto chris =
             compute_christoffel(d1.h, h_UU);
+        const auto chris_phys = compute_phys_chris(d1.chi, vars.chi, vars.h, h_UU, chris.ULL);
         const emtensor_t<data_t> emtensor = m_matter.compute_emtensor(
-            vars, d1, h_UU, chris_phys.ULL);
+            vars, d1, h_UU, chris.ULL);
         const data_t det_gamma = compute_determinant_sym(gamma);
 
         Tensor<1,data_t> Mom;
@@ -103,8 +104,8 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
                 Source[l] += emtensor.Si[i] * d1.shift[i][l];
                 FOR2(j, k)
                 {
-                    Source[l] += metric_vars.lapse * gamma_UU[i][k] *
-                            emtensor.Sij[k][j] * chris_phys.ULL[j][i][l];
+                    Source[l] += vars.lapse * gamma_UU[i][k] *
+                            emtensor.Sij[k][j] * chris_phys[j][i][l];
                 }
             }
         }

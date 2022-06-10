@@ -1,14 +1,14 @@
 #Params for runtime inputs
 
 verbosity = 0
-chk_prefix = v03_chk_
-plot_prefix = v03_plt_
+chk_prefix = run1/v03_chk_
+plot_prefix = run1/v03_plt_
 #restart_file = v03_chk_000200.3d.hdf5
 
 # Set up grid spacings and regrid params
 # NB - the N values need to be multiples of block_factor
 N1 = 128
-N2 = 64
+N2 = 128
 N3 = 64
 
 # Length of longest box side, dx_coarsest = L/N(max)
@@ -42,8 +42,8 @@ isPeriodic = 0 0 0
 # 4 = mixed, 5 = fudge
 # (see BoundaryConditions.hpp for details)
 hi_boundary = 3 3 3
-lo_boundary = 3 2 2
-#center = 2048.0 0.0 0.0
+lo_boundary = 3 3 2
+#center = 2048.0 2048.0 0.0
 
 # if reflective boundaries selected, must select 
 # parity values (in order given by UserVariables.hpp)
@@ -89,6 +89,7 @@ scalar_amplitude = 0.1
 bh_mass = 1.0
 bh_velocity = -0.5
 bh_spin = 0.3
+# bh_center = 2048.0 2048.0 0.0
 
 # For volume integrals
 inner_r = 3.0
