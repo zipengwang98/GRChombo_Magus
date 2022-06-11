@@ -163,7 +163,7 @@ class BoostedIsotropicKerrFixedBG
     }
 
     template <class data_t>
-    data_t get_alpha(double M, double a, double V, data_t x, double y, double z) const {
+    data_t get_alpha_part(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -214,13 +214,13 @@ class BoostedIsotropicKerrFixedBG
         std::cout << "dzfunc1 : " << dz_func1 << std::endl;
         */
 
-        data_t alpha;
-        #include "BoostedIsotropicKerrBHFixedBG_Coutput/alpha.txt"
-        return alpha;
+        data_t alpha_part;
+        alpha_part = -((func0 - 2*M*pow(r,2)*rBL)/(func0*pow(boost,2)));
+        return alpha_part;
     }
 
     template<class data_t>
-    Tensor<1,data_t> get_beta(double M, double a, double V, data_t x, double y, double z) const {
+    Tensor<1,data_t> get_betaL(double M, double a, double V, data_t x, double y, double z) const {
 
         const double t = 0.0;
         const double v2 = V * V;
@@ -260,11 +260,12 @@ class BoostedIsotropicKerrFixedBG
         data_t dz_func3 = get_d_func(M, a, V, x, y, z, 3, 3);
         
 
-        Tensor<1,data_t> betaU;
-        #include "BoostedIsotropicKerrBHFixedBG_Coutput/beta0.txt"
-        #include "BoostedIsotropicKerrBHFixedBG_Coutput/beta1.txt"
-        #include "BoostedIsotropicKerrBHFixedBG_Coutput/beta2.txt"
-        return betaU;
+        Tensor<1,data_t> betaL;
+        betaL[0] = -((func0*V - 2*M*(pow(r,2)*V + a*y)*rBL)/func0);
+        betaL[1] = (-2*a*M*x*rBL)/func0 ;
+        betaL[2] = 0;
+
+        return betaL;
     }
 
     template<class data_t>
@@ -321,6 +322,7 @@ class BoostedIsotropicKerrFixedBG
         return gammaLL;
     }
 
+    /*
     template<class data_t>
     Tensor<1,data_t> get_d1alpha(double M, double a, double V, data_t x, double y, double z) const {
 
@@ -428,7 +430,7 @@ class BoostedIsotropicKerrFixedBG
 
         return d1betaU;
     }
-
+    */
     template<class data_t>
     Tensor<3,data_t> get_d1gamma(double M, double a, double V, data_t x, double y, double z) const {
 
@@ -489,6 +491,7 @@ class BoostedIsotropicKerrFixedBG
         return d1gammaLL;
     }
 
+    /*
     template<class data_t>
     const Tensor<2,data_t> get_K(double M, double a, double V, data_t x, double y, double z) const {
 
@@ -543,6 +546,7 @@ class BoostedIsotropicKerrFixedBG
         K[2][1] = K[1][2];
         return K;
     }
+    */
 
     /// This just calculates chi which helps with regridding, debug etc
     /// it is only done once on setup as the BG is fixed
@@ -581,29 +585,94 @@ class BoostedIsotropicKerrFixedBG
         double y = coords.y;
         double z = coords.z;
 
-        //DEBUG!!!
-        //data_t xnum = 0.8; double ynum = 0.4; double znum = 0.5;
         // populate ADM vars
-        const data_t alpha = get_alpha(M, a, V, x, y, z);
-        Tensor<1,data_t> betaU = get_beta(M, a, V, x, y, z);
+
+        Tensor<1,data_t> betaL = get_betaL(M, a, V, x, y, z);
         Tensor<2,data_t> gamma = get_gamma(M, a, V, x, y, z);
-        Tensor<2,data_t> K = get_K(M, a, V, x, y, z);
-        
-        vars.lapse = alpha;
-        FOR1(i){ vars.shift[i] = 0;} //DEBUG!!! betaU[i]; } 
-        FOR2(i,j){ vars.gamma[i][j] = gamma[i][j]; }     
-        FOR2(i,j){ vars.K_tensor[i][j] = K[i][j]; }
-
         using namespace TensorAlgebra;
-
-        const auto gamma_UU = compute_inverse_sym(vars.gamma);
-                
-        vars.K = compute_trace(gamma_UU, vars.K_tensor);
-
-        
-        Tensor<1,data_t> d1alpha = get_d1alpha(M, a, V, x, y, z);
-        Tensor<2,data_t> d1betaU = get_d1beta(M, a, V, x, y, z);
+        const auto gamma_UU = compute_inverse_sym(gamma);
         Tensor<3,data_t> d1gamma = get_d1gamma(M, a, V, x, y, z);
+        //part of the alpha (g[0][0])
+        const data_t alpha_part = get_alpha_part(M, a, V, x, y, z);
+        //construct betaU
+        Tensor<1,data_t> betaU;
+        FOR1(i) betaU[i] = 0;
+        FOR2(i,j) betaU[i] += gamma_UU[i][j] * betaL[j];
+        //construct lapse
+        double const data_t alpha = -alpha_part;
+        FOR1(i) alpha += -betaL[i] * betaU[i];
+        alpha = pow(alpha, 0.5);
+
+        // numerically calculate derivatives
+        double epsilon = 1e-4;
+        Tensor<1,data_t> d1alpha ; //get_d1alpha(M, a, V, x, y, z);
+        const data_t alpha_new;
+        Tensor<2,data_t> d1betaU;
+        Tensor<1,data_t> betaU_new; 
+        FOR1(i){
+            d1alpha[i] = 0;
+            FOR1(j) d1betaU[j][i] = 0;
+            if (i==0) {
+            alpha_new = get_alpha(M, a, V, x+epsilon, y, z);
+            betaU_new = get_beta(M, a, V, x+epsilon, y, z);
+            }
+            elif (i==1) {
+                alpha_new = get_alpha(M, a, V, x, y+epsilon, z);
+                betaU_new = get_beta(M, a, V, x, y+epsilon, z);
+            }
+            elif (i==2) {
+                alpha_new = get_alpha(M, a, V, x, y, z+epsilon);
+                betaU_new = get_beta(M, a, V, x, y, z+epsilon);
+            }
+            d1alpha[i] = (alpha_new - alpha) / epsilon;
+            FOR1(j) d1betaU[j][i] = (betaU_new[j] - betaU[j]) / epsilon;
+        }
+
+
+        vars.lapse = alpha;
+        FOR1(i){ vars.shift[i] = betaU[i]; } 
+        FOR2(i,j){ vars.gamma[i][j] = gamma[i][j]; }
+
+        FOR3(i, j, k) { vars.d1_gamma[i][j][k] = d1gamma[i][j][k]; }
+        // calculate derivs of lapse and shift
+        FOR1(i)
+        {
+            vars.d1_lapse[i] = d1alpha[i];
+        }
+
+        FOR2(i, j)
+        {
+            vars.d1_shift[i][j] = d1betaU[i][j];
+        }
+
+
+        // calculate the extrinsic curvature, using the fact that
+        // 2 * lapse * K_ij = D_i \beta_j + D_j \beta_i - dgamma_ij dt
+        // and dgamma_ij dt = 0 in chosen fixed gauge
+        const auto chris_phys = compute_christoffel(d1gamma, gamma_UU);
+        FOR2(i, j)
+        {
+            vars.K_tensor[i][j] = 0.0;
+            FOR1(k)
+            {
+                vars.K_tensor[i][j] +=
+                    vars.gamma[k][j] * vars.d1_shift[k][i] +
+                    vars.gamma[k][i] * vars.d1_shift[k][j] +
+                    (vars.d1_gamma[k][i][j] + vars.d1_gamma[k][j][i]) *
+                        vars.shift[k];
+                FOR1(m)
+                {
+                    vars.K_tensor[i][j] += -2.0 * chris_phys.ULL[k][i][j] *
+                                           vars.gamma[k][m] * vars.shift[m];
+                }
+            }
+            vars.K_tensor[i][j] *= 0.5 / vars.lapse;
+        }
+        vars.K = compute_trace(gamma_UU, vars.K_tensor);
+        //Tensor<2,data_t> K = get_K(M, a, V, x, y, z);
+        //FOR2(i,j){ vars.K_tensor[i][j] = K[i][j]; }
+        
+
         
         /*
         std::cout << "K 11: " << vars.K_tensor[0][0] << std::endl;
@@ -622,18 +691,7 @@ class BoostedIsotropicKerrFixedBG
         */
 
         // Calculate partial derivative of spatial metric
-        FOR3(i, j, k) { vars.d1_gamma[i][j][k] = d1gamma[i][j][k]; }
 
-        // calculate derivs of lapse and shift
-        FOR1(i)
-        {
-            vars.d1_lapse[i] = d1alpha[i];
-        }
-
-        FOR2(i, j)
-        {
-            vars.d1_shift[i][j] = d1betaU[i][j];
-        }
 
         
     }
