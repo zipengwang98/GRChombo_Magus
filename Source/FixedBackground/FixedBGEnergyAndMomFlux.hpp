@@ -96,7 +96,7 @@ template <class matter_t, class background_t> class FixedBGEnergyAndMomFlux
         Tensor<2, data_t> spherical_gamma = cartesian_to_spherical_LL(
             gamma, coords.x, coords.y, coords.z);
         data_t dArea = area_element_sphere(spherical_gamma);
-        pout() << "dArea: " << dArea << endl;
+        //pout() << "dArea: " << dArea << endl;
 
         const data_t R = coords.get_radius();
         data_t rho2 =
