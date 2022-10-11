@@ -95,8 +95,16 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
         Tensor<1,data_t> Mom;
         FOR1(i) Mom[i] = -emtensor.Si[i] * sqrt(det_gamma);
 
+        data_t ECharge = -emtensor.rho * vars.lapse;
+        FOR1(i){
+            ECharge += vars.shift[i] * emtensor.Si[i];
+        }
+        ECharge = ECharge * sqrt(det_gamma);
+
+
         Tensor<1,data_t> Source;
         FOR1(i) Source[i] = -emtensor.rho * d1.lapse[i];
+        
 
         FOR1(l){
             FOR1(i)
@@ -112,7 +120,9 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
 
         FOR1(i) Source[i] = Source[i] * sqrt(det_gamma);
 
-        current_cell.store_vars(emtensor.rho, c_rho);
+
+        //current_cell.store_vars(emtensor.rho, c_rho);
+        current_cell.store_vars(ECharge, c_rho);
         current_cell.store_vars(Source[0], c_xSource);
         current_cell.store_vars(Source[1], c_ySource);
         current_cell.store_vars(Source[2], c_zSource);
