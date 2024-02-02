@@ -26,14 +26,16 @@ template <class matter_t, class background_t> class ExcisionDiagnostics
     const background_t m_background;
     const double m_inner_r;
     const double m_outer_r;
+    const int m_loop_num;
 
   public:
     ExcisionDiagnostics(const double a_dx,
                         const std::array<double, CH_SPACEDIM> a_center,
                         background_t a_background, const double a_inner_r,
-                        const double a_outer_r)
+                        const double a_outer_r, const int a_loop_num)
         : m_dx(a_dx), m_deriv(m_dx), m_center(a_center),
-          m_background(a_background), m_inner_r(a_inner_r), m_outer_r(a_outer_r)
+          m_background(a_background), m_inner_r(a_inner_r), m_outer_r(a_outer_r),
+          m_loop_num(a_loop_num)
     {
     }
 
@@ -42,13 +44,28 @@ template <class matter_t, class background_t> class ExcisionDiagnostics
         const Coordinates<double> coords(current_cell, m_dx, m_center);
         if (coords.get_radius() < m_inner_r || coords.get_radius() > m_outer_r)
         {
-            current_cell.store_vars(0.0, c_xSource);
-            current_cell.store_vars(0.0, c_ySource);
-            current_cell.store_vars(0.0, c_zSource);
-            current_cell.store_vars(0.0, c_xMom);
-            current_cell.store_vars(0.0, c_yMom);
-            current_cell.store_vars(0.0, c_zMom);
-            current_cell.store_vars(0.0, c_rho);
+            if (m_loop_num == 0 ){
+              current_cell.store_vars(0.0, c_xSource);
+              current_cell.store_vars(0.0, c_ySource);
+              current_cell.store_vars(0.0, c_xMom);
+              current_cell.store_vars(0.0, c_yMom);
+              current_cell.store_vars(0.0, c_rho);
+
+            }
+            else if (m_loop_num == 1 ){
+              current_cell.store_vars(0.0, c_xSource_1);
+              current_cell.store_vars(0.0, c_ySource_1);
+              current_cell.store_vars(0.0, c_xMom_1);
+              current_cell.store_vars(0.0, c_yMom_1);
+              current_cell.store_vars(0.0, c_rho_1);
+            }
+            else if (m_loop_num == 2 ){
+              current_cell.store_vars(0.0, c_xSource_2);
+              current_cell.store_vars(0.0, c_ySource_2);
+              current_cell.store_vars(0.0, c_xMom_2);
+              current_cell.store_vars(0.0, c_yMom_2);
+              current_cell.store_vars(0.0, c_rho_2);
+            }
         }
     }
 };

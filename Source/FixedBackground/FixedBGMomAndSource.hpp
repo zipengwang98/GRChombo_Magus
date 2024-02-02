@@ -53,12 +53,15 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
     const double m_dx;                              //!< The grid spacing
     const background_t m_background;                //!< The metric background
     const std::array<double, CH_SPACEDIM> m_center; //!< The grid center
+    const int m_loop_num;
 
   public:
     FixedBGMomAndSource(matter_t a_matter, background_t a_background,
-                        double a_dx, std::array<double, CH_SPACEDIM> a_center)
+                        double a_dx, std::array<double, CH_SPACEDIM> a_center,
+                        int a_loop_num)
         : m_matter(a_matter), m_deriv(a_dx), m_dx(a_dx),
-          m_background(a_background), m_center(a_center)
+          m_background(a_background), m_center(a_center),
+          m_loop_num(a_loop_num)
     {
     }
 
@@ -120,15 +123,37 @@ template <class matter_t, class background_t> class FixedBGMomAndSource
 
         FOR1(i) Source[i] = Source[i] * sqrt(det_gamma);
 
+        if (m_loop_num == 0){
+            //current_cell.store_vars(emtensor.rho, c_rho);
+            current_cell.store_vars(ECharge, c_rho);
+            current_cell.store_vars(Source[0], c_xSource);
+            current_cell.store_vars(Source[1], c_ySource);
+            //current_cell.store_vars(Source[2], c_zSource);
+            current_cell.store_vars(Mom[0], c_xMom);
+            current_cell.store_vars(Mom[1], c_yMom);
+            //current_cell.store_vars(Mom[2], c_zMom);
+        }
+        else if (m_loop_num == 1){
+            //current_cell.store_vars(emtensor.rho, c_rho);
+            current_cell.store_vars(ECharge, c_rho_1);
+            current_cell.store_vars(Source[0], c_xSource_1);
+            current_cell.store_vars(Source[1], c_ySource_1);
+            //current_cell.store_vars(Source[2], c_zSource);
+            current_cell.store_vars(Mom[0], c_xMom_1);
+            current_cell.store_vars(Mom[1], c_yMom_1);
+            //current_cell.store_vars(Mom[2], c_zMom);
+        }
+        else if (m_loop_num == 2){
+            //current_cell.store_vars(emtensor.rho, c_rho);
+            current_cell.store_vars(ECharge, c_rho_2);
+            current_cell.store_vars(Source[0], c_xSource_2);
+            current_cell.store_vars(Source[1], c_ySource_2);
+            //current_cell.store_vars(Source[2], c_zSource);
+            current_cell.store_vars(Mom[0], c_xMom_2);
+            current_cell.store_vars(Mom[1], c_yMom_2);
+            //current_cell.store_vars(Mom[2], c_zMom);
+        }
 
-        //current_cell.store_vars(emtensor.rho, c_rho);
-        current_cell.store_vars(ECharge, c_rho);
-        current_cell.store_vars(Source[0], c_xSource);
-        current_cell.store_vars(Source[1], c_ySource);
-        current_cell.store_vars(Source[2], c_zSource);
-        current_cell.store_vars(Mom[0], c_xMom);
-        current_cell.store_vars(Mom[1], c_yMom);
-        current_cell.store_vars(Mom[2], c_zMom);
 
     }
 };

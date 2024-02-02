@@ -3,7 +3,7 @@
 verbosity = 0
 chk_prefix = ./v03_chk_
 plot_prefix = ./v03_plt_
-#restart_file = test8/v03_chk_001250.3d.hdf5
+restart_file = ./v03_chk_000300.3d.hdf5
 
 # Set up grid spacings and regrid params
 # NB - the N values need to be multiples of block_factor
@@ -13,7 +13,7 @@ N3 = 64
 
 # Length of longest box side, dx_coarsest = L/N(max)
 # NB if non cubic, this determines dx for all sides
-L = 1024
+L = 1500
 
 # Regridding
 tag_buffer_size = 0
@@ -55,8 +55,10 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3          #Theta and Gamma
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 0 0 0   #phi and Pi
-vars_parity_diagnostic = 0 0 0 0 0 0 0 0 0 0 0 0 #chi rho xSource ySource zSource xMom yMom zMom xMdot yMdot zMdot Edot
-
+vars_parity_diagnostic = 0 0 0 0 0 0 0    #chi rho xSource ySource zSource xMom yMom
+                         0 0 0 0 0        #rho_1 xSource_1 ySource_1 xMom_1 yMom_1
+                         0 0 0 0 0        #rho_2 xSource_2 ySource_2 xMom_2 yMom_2
+                         0 0 0 0          #xMdot yMdot zMdot Edot
 # specify non zero asympotitic vars
 num_nonzero_asymptotic_vars = 0
 nonzero_asymptotic_vars = chi

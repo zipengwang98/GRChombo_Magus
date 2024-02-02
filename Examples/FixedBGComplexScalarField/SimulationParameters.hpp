@@ -40,16 +40,22 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("scalar_mass", scalar_mass);
 
         // Volume extraction radii
-        pp.load("inner_r", inner_r, 5.0);
-        pp.load("outer_r", outer_r, 100.0 / scalar_mass);
+        pp.load("num_integral_r", num_integral_r, 1);
+        pp.load("inner_r", inner_r, num_integral_r);
+        pp.load("outer_r", outer_r, num_integral_r);
+        pout() << "outer_r 0: " << outer_r[0] << endl;
+        pout() << "outer_r 1: " << outer_r[1] << endl;
+        pout() << "inner_r 0: " << inner_r[0] << endl;
+        pout() << "inner_r 1: " << inner_r[1] << endl;
     }
 
     // Problem specific parameters
     double scalar_amplitude, scalar_mass, regrid_length;
-    double inner_r, outer_r;
     // Collection of parameters necessary for the sims
     BoostedIsotropicKerr::params_t bg_params;
     double G_Newton;
+    int num_integral_r;
+    std::vector<double> inner_r, outer_r;
 };
 
 #endif /* SIMULATIONPARAMETERS_HPP_ */
